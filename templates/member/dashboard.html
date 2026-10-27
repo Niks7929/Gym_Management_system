@@ -1,0 +1,274 @@
+{% extends "member/base.html" %}
+
+{% block title %}Member Dashboard{% endblock %}
+{% block page_title %}Athlete Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- 1. Welcome Banner Card -->
+    <div class="app-card border border-emerald-500/30 bg-gradient-to-r from-emerald-950/50 via-slate-900 to-slate-900 p-6">
+        <div class="d-flex flex-wrap items-center justify-between gap-4">
+            <div class="d-flex items-center gap-4">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-emerald-500/20">
+                    {{ member.full_name[0] if member else 'M' }}
+                </div>
+                <div class="space-y-1">
+                    <div class="d-flex items-center gap-2">
+                        <h3 class="text-2xl font-black text-white mb-0">Welcome back, {{ member.full_name if member else 'Athlete' }}!</h3>
+                        <span class="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                            {{ member.member_code if member else 'MEM-1001' }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-300 mb-0">
+                        Primary Goal: <strong class="text-amber-400">{{ member.fitness_goal if member else 'General Fitness' }}</strong> &bull; 
+                        Plan: <strong class="text-white">{{ member.plan_name if member else 'Standard Membership' }}</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                {% if member and member.status == 'Active' %}
+                    <span class="status-badge status-active text-sm px-4 py-2"><i class="bi bi-check-circle-fill"></i> Active Membership</span>
+                {% elif member and member.status == 'Expired' %}
+                    <span class="status-badge status-expired text-sm px-4 py-2"><i class="bi bi-exclamation-triangle-fill"></i> Membership Expired</span>
+                {% else %}
+                    <span class="status-badge status-inactive text-sm px-4 py-2">Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Expired Alert Notice if expired -->
+    {% if member and member.status == 'Expired' %}
+    <div class="bg-rose-500/15 border border-rose-500/40 p-4 rounded-2xl d-flex flex-wrap items-center justify-between gap-3">
+        <div class="d-flex items-center gap-3">
+            <i class="bi bi-exclamation-octagon-fill text-rose-400 text-3xl"></i>
+            <div>
+                <h6 class="font-bold text-white mb-0">Your membership plan has expired!</h6>
+                <span class="text-xs text-slate-300">Renew your subscription plan today to maintain uninterrupted access to gym facilities & trainer routines.</span>
+            </div>
+        </div>
+        <a href="{{ url_for('member_membership') }}" class="btn-gym-primary text-xs py-2 px-4 font-bold shadow-lg shadow-rose-500/20">
+            <i class="bi bi-arrow-repeat"></i> Renew Membership Now
+        </a>
+    </div>
+    {% endif %}
+
+    <!-- 2. Statistics Grid -->
+    <div class="row g-4">
+        <!-- Days Remaining -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-emerald">
+                <div class="stat-card-top">
+                    <span class="stat-title">Days Remaining</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ days_remaining }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-calendar-event text-emerald-400"></i>
+                    <span>Expires: {{ member.end_date if member else 'N/A' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance % -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-cyan">
+                <div class="stat-card-top">
+                    <span class="stat-title">Attendance Rate</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-percent"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ attendance_pct }}%</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-check2-circle text-cyan-400"></i>
+                    <span>Total Visits: {{ total_visits }} Days</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Trainer -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-amber">
+                <div class="stat-card-top">
+                    <span class="stat-title">Assigned Coach</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-person-badge-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number text-lg font-bold truncate mt-2">{{ trainer.full_name if trainer else 'General Coach' }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-star-fill text-amber-400"></i>
+                    <span>{{ trainer.specialization if trainer else 'Personal Trainer' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Weight -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-purple">
+                <div class="stat-card-top">
+                    <span class="stat-title">Current Weight</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-bar-chart-line-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ latest_progress.weight if latest_progress else '75.0' }} <span class="text-sm">kg</span></div>
+                <div class="stat-subtext">
+                    <i class="bi bi-speedometer text-purple-400"></i>
+                    <span>BMI: {{ latest_progress.bmi if latest_progress else '24.5' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Next Session -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-rose">
+                <div class="stat-card-top">
+                    <span class="stat-title">Next Session</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-stopwatch-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number text-base font-bold truncate mt-2">{{ next_session.workout_type if next_session else 'General Workout' }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-clock text-rose-400"></i>
+                    <span>{{ next_session.session_time if next_session else '07:00 AM' }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Quick Action Cards -->
+    <div class="row g-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ url_for('member_payments') }}" class="app-card text-center p-4 hover:border-emerald-500 transition-all block text-white group">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-all">
+                    <i class="bi bi-credit-card-fill"></i>
+                </div>
+                <h6 class="font-bold text-xs mb-0">Pay Fees / Dues</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ url_for('member_workouts') }}" class="app-card text-center p-4 hover:border-cyan-500 transition-all block text-white group">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-all">
+                    <i class="bi bi-activity"></i>
+                </div>
+                <h6 class="font-bold text-xs mb-0">My Workouts</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ url_for('member_diet') }}" class="app-card text-center p-4 hover:border-purple-500 transition-all block text-white group">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-all">
+                    <i class="bi bi-egg-fried"></i>
+                </div>
+                <h6 class="font-bold text-xs mb-0">Diet Suggestions</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ url_for('member_attendance') }}" class="app-card text-center p-4 hover:border-blue-500 transition-all block text-white group">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-all">
+                    <i class="bi bi-calendar-check-fill"></i>
+                </div>
+                <h6 class="font-bold text-xs mb-0">Gym Attendance</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ url_for('member_trainer') }}" class="app-card text-center p-4 hover:border-amber-500 transition-all block text-white group">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-all">
+                    <i class="bi bi-person-badge-fill"></i>
+                </div>
+                <h6 class="font-bold text-xs mb-0">Assigned Coach</h6>
+            </a>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <a href="{{ url_for('member_messages') }}" class="app-card text-center p-4 hover:border-rose-500 transition-all block text-white group">
+                <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-500/10 text-rose-400 flex items-center justify-center text-2xl mb-2 group-hover:scale-110 transition-all">
+                    <i class="bi bi-chat-left-text-fill"></i>
+                </div>
+                <h6 class="font-bold text-xs mb-0">Message Support</h6>
+            </a>
+        </div>
+    </div>
+
+    <!-- 4. Today's Workout & Diet Overview -->
+    <div class="row g-4">
+        <!-- Assigned Workout Snippet -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-activity text-emerald-400"></i>
+                        <span>Today's Recommended Workout</span>
+                    </h5>
+                    <a href="{{ url_for('member_workouts') }}" class="text-xs text-emerald-400 font-semibold hover:underline">Full Workout Plan &rarr;</a>
+                </div>
+
+                {% if latest_workout %}
+                <div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-3">
+                    <div class="d-flex justify-between items-center">
+                        <h6 class="font-bold text-white mb-0 text-base">{{ latest_workout.workout_name }}</h6>
+                        <span class="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                            {{ latest_workout.difficulty }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-0">
+                        <strong>Exercises:</strong> {{ latest_workout.exercises }}
+                    </p>
+                    <div class="d-flex justify-between text-xs text-slate-400 font-mono pt-2 border-t border-slate-800">
+                        <span>Sets: <strong class="text-white">{{ latest_workout.sets }}</strong> &bull; Reps: <strong class="text-emerald-400">{{ latest_workout.reps }}</strong></span>
+                        <span>Duration: <strong class="text-cyan-400">{{ latest_workout.duration or '60m' }}</strong></span>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center text-slate-400 py-6">
+                    <i class="bi bi-info-circle text-2xl text-slate-500 mb-1 block"></i>
+                    No workout assigned by coach yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Assigned Diet Snippet -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-egg-fried text-purple-400"></i>
+                        <span>Daily Meal Suggestions</span>
+                    </h5>
+                    <a href="{{ url_for('member_diet') }}" class="text-xs text-purple-400 font-semibold hover:underline">Full Diet Schedule &rarr;</a>
+                </div>
+
+                {% if diet_meals %}
+                <div class="space-y-2">
+                    {% for m in diet_meals[:3] %}
+                    <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 d-flex justify-between items-center gap-3 text-xs">
+                        <div>
+                            <span class="font-bold text-white block">{{ m.meal_name }}</span>
+                            <span class="text-slate-400">{{ m.food_items }} ({{ m.quantity }})</span>
+                        </div>
+                        <div class="text-end font-mono">
+                            <span class="text-amber-400 font-bold block">{{ m.calories }} kcal</span>
+                            <span class="text-emerald-400 text-[10px]">{{ m.protein }}g Protein</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center text-slate-400 py-6">
+                    <i class="bi bi-info-circle text-2xl text-slate-500 mb-1 block"></i>
+                    No diet plan assigned by coach yet.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

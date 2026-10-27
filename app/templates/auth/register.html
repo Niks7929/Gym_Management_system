@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Member Registration | SETFIT GYM{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-darker min-vh-100 d-flex align-items-center">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8 col-sm-11">
+                <div class="card bg-dark-card border border-dark-rage p-4 p-md-5 rounded-4 shadow-lg">
+                    <!-- Brand Header -->
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-black border border-rage p-3" style="width: 70px; height: 70px;">
+                                <i class="fas fa-dumbbell text-rage fs-2"></i>
+                            </span>
+                        </div>
+                        <h2 class="text-main fw-bold text-uppercase mb-1">
+                            SETFIT <span class="text-rage">GYM</span>
+                        </h2>
+                        <p class="text-secondary fw-semibold text-uppercase small letter-spacing-1 mb-2">Create Account</p>
+                        <p class="text-muted small mb-0">Fill in the essential details below to register.</p>
+                    </div>
+
+                    <!-- 5-Field Simplified Registration Form -->
+                    <form method="POST" action="{{ url_for('auth.register') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- 1. Register As (Role Selector) -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Register As</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
+                                <select name="role" id="registerRoleSelect" class="form-select py-2" onchange="togglePlanSelection(this.value)" required>
+                                    <option value="member" selected>Member / Athlete</option>
+                                    <option value="trainer">Trainer / Coach</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 2. Full Name -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Full Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" name="full_name" class="form-control py-2" placeholder="Enter your full name" required autofocus>
+                            </div>
+                        </div>
+
+                        <!-- 3. Email Address -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="email" class="form-control py-2" placeholder="name@domain.com" required>
+                            </div>
+                        </div>
+
+                        <!-- 4. Contact Number -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Contact / Phone Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
+                                <input type="tel" name="phone" class="form-control py-2" placeholder="+91 98765 43210" required>
+                            </div>
+                        </div>
+
+                        <!-- 5. Password -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="password" class="form-control py-2" placeholder="••••••••" minlength="6" required>
+                            </div>
+                        </div>
+
+                        <!-- 6. Membership Tier (Shown for Member role) -->
+                        <div class="mb-4" id="planSelectionGroup">
+                            <label class="form-label small text-uppercase fw-semibold">Membership Tier</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                                <select name="plan_id" class="form-select py-2">
+                                    {% for plan in plans %}
+                                        <option value="{{ plan.id }}" {{ 'selected' if selected_plan_id == plan.id }}>
+                                            {{ plan.name }} — ₹{{ "{:,.0f}".format(plan.price) }} ({{ plan.duration_months }} Months)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-rage w-100 py-3 text-uppercase fw-bold shadow-lg fs-6">
+                            <i class="fas fa-user-plus me-2"></i> Register Account
+                        </button>
+                    </form>
+
+                    <!-- Link to Sign In -->
+                    <div class="mt-4 pt-4 border-top border-dark-rage text-center">
+                        <p class="text-muted small mb-0">
+                            Already registered? <a href="{{ url_for('auth.login') }}" class="text-main text-decoration-none fw-bold hover-rage">Sign In Here</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function togglePlanSelection(role) {
+    const planGroup = document.getElementById('planSelectionGroup');
+    if (planGroup) {
+        if (role === 'member') {
+            planGroup.style.display = 'block';
+        } else {
+            planGroup.style.display = 'none';
+        }
+    }
+}
+</script>
+{% endblock %}

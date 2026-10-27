@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Master Coaches & Trainers | SETFIT GYM{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-darker border-bottom border-dark-rage min-vh-100">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="badge bg-rage text-white px-3 py-2 text-uppercase mb-2">Elite Strength Mentorship</span>
+            <h1 class="display-4 text-main fw-bold text-uppercase">The <span class="text-rage">Coaching Roster</span></h1>
+            <p class="text-muted max-w-700 mx-auto">Certified strength and conditioning specialists, competitive powerlifters, and clinical sports nutritionists dedicated to your progression.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% if trainers %}
+                {% for trainer in trainers %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card bg-dark-card border border-dark-rage rounded-3 overflow-hidden h-100 feature-box">
+                        <img src="https://images.unsplash.com/photo-1567013127542-490d757e51fc?q=80&w=800&auto=format&fit=crop" class="card-img-top object-cover" style="height: 280px;" alt="{{ trainer.user.full_name if trainer.user else 'Coach' }}">
+                        <div class="card-body p-4">
+                            <span class="badge bg-dark-card border border-dark-rage text-rage text-uppercase mb-2">{{ trainer.specialization or 'Strength & Conditioning' }}</span>
+                            <h4 class="text-main fw-bold text-uppercase mb-1">{{ trainer.user.full_name if trainer.user else 'Coach' }}</h4>
+                            <p class="text-muted small mb-3"><i class="fas fa-award text-warning me-1"></i> {{ trainer.experience_years }}+ Years Elite Experience</p>
+                            <p class="text-secondary small mb-3">{{ trainer.bio or 'Specializes in heavy barbell mechanics, hypertrophy split programming, and athletic energy system development.' }}</p>
+                            
+                            <div class="pt-3 border-top border-dark-rage d-flex justify-content-between align-items-center">
+                                <span class="text-main small fw-bold">Rate: ₹{{ "{:,.0f}".format(trainer.hourly_rate) }}/hr</span>
+                                <a href="{{ url_for('public.contact') }}" class="btn btn-rage-outline btn-sm text-uppercase">Book Coach</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center py-5">
+                    <div class="p-5 bg-dark-card border border-dark-rage rounded-4 max-w-600 mx-auto">
+                        <i class="fas fa-user-ninja text-rage display-4 mb-3"></i>
+                        <h4 class="text-white fw-bold text-uppercase mb-2">Coaches Roster Updating</h4>
+                        <p class="text-muted small mb-0">Our certified trainers and coaching schedules are currently being updated. Please contact the front desk for coach availability.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

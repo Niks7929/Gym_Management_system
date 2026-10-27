@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Access Portals | SETFIT GYM{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 d-flex align-items-center py-5 bg-darker position-relative">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-rage text-white px-3 py-2 text-uppercase mb-2">Central Authentication Gateway</span>
+            <h1 class="display-4 text-main fw-bold text-uppercase">Select Your <span class="text-rage">Portal</span></h1>
+            <p class="text-muted max-w-600 mx-auto">Choose your dedicated role terminal to access customized workout programs, athlete dashboards, or management tools.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <!-- Member Portal Card -->
+            <div class="col-lg-5 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 rounded-4 overflow-hidden portal-card transition-hover">
+                    <div class="card-body p-4 p-lg-5 text-center d-flex flex-column">
+                        <div class="portal-icon-wrapper mx-auto mb-4 bg-black rounded-circle d-flex align-items-center justify-content-center border border-rage" style="width: 80px; height: 80px;">
+                            <i class="fas fa-id-card text-rage fs-2"></i>
+                        </div>
+                        <h3 class="text-main fw-bold text-uppercase mb-2">Athlete Member</h3>
+                        <p class="text-muted small mb-4 flex-grow-1">Access your digital QR biometric check-in pass, active workout splits, diet blueprints, and membership status.</p>
+                        
+                        <div class="d-flex flex-column gap-2 mt-auto">
+                            <a href="{{ url_for('auth.login', role='member') }}" class="btn btn-rage w-100 py-3 text-uppercase fw-bold">
+                                Member Sign In
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light btn-sm text-uppercase">
+                                New Athlete? Join Here
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trainer Portal Card -->
+            <div class="col-lg-5 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 rounded-4 overflow-hidden portal-card transition-hover">
+                    <div class="card-body p-4 p-lg-5 text-center d-flex flex-column">
+                        <div class="portal-icon-wrapper mx-auto mb-4 bg-black rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width: 80px; height: 80px;">
+                            <i class="fas fa-user-ninja text-rage fs-2"></i>
+                        </div>
+                        <h3 class="text-main fw-bold text-uppercase mb-2">Coach / Trainer</h3>
+                        <p class="text-muted small mb-4 flex-grow-1">Manage assigned athletes, design custom workout splits, assign nutrition macros, and track client progression metrics.</p>
+                        
+                        <a href="{{ url_for('auth.login', role='trainer') }}" class="btn btn-outline-light w-100 py-3 text-uppercase fw-bold mt-auto">
+                            Coach Sign In
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discreet Protected Admin Link -->
+        <div class="text-center mt-5 pt-4">
+            <a href="{{ url_for('auth.admin_access') }}" class="text-muted hover-rage text-decoration-none small">
+                <i class="fas fa-shield-alt me-1"></i> Master Admin Terminal Access
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

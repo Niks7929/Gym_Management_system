@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Member Details - {{ member.full_name }}{% endblock %}
+{% block page_title %}Member Profile{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('members_list') }}">Members</a> / {{ member.full_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Action Bar -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <a href="{{ url_for('members_list') }}" class="btn-gym-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Members
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('member_edit', id=member.id) }}" class="btn-gym-primary">
+                <i class="bi bi-pencil-square"></i> Edit Profile
+            </a>
+            <button type="button" class="btn-gym-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Top Profile Summary Card -->
+    <div class="app-card bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-slate-700">
+        <div class="d-flex flex-wrap items-center justify-between gap-4">
+            <div class="d-flex items-center gap-4">
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 flex items-center justify-center text-white text-3xl font-extrabold shadow-lg shadow-emerald-500/20">
+                    {{ member.full_name[:1].upper() }}
+                </div>
+                <div>
+                    <div class="d-flex items-center gap-3">
+                        <h2 class="text-2xl font-bold text-white mb-0">{{ member.full_name }}</h2>
+                        {% if member.status == 'Active' %}
+                            <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Active</span>
+                        {% elif member.status == 'Expired' %}
+                            <span class="status-badge status-expired"><i class="bi bi-exclamation-circle-fill"></i> Expired</span>
+                        {% else %}
+                            <span class="status-badge status-inactive"><i class="bi bi-dash-circle-fill"></i> Inactive</span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-wrap items-center gap-3 mt-1 text-sm text-slate-400">
+                        <span class="font-mono text-emerald-400 font-bold bg-slate-950/60 px-2 py-0.5 rounded border border-slate-700">
+                            {{ member.member_code }}
+                        </span>
+                        <span><i class="bi bi-calendar-check"></i> Member since {{ member.joining_date }}</span>
+                        <span><i class="bi bi-geo-alt"></i> {{ member.address or 'Pune' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Current Plan Highlight Box -->
+            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-700 text-end min-w-[200px]">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Assigned Plan</span>
+                <span class="text-lg font-bold text-white block">{{ member.plan_name or 'No Active Plan' }}</span>
+                {% if member.plan_price %}
+                <span class="text-emerald-400 font-bold text-sm">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(member.plan_price) }}</span>
+                <span class="text-xs text-slate-400">/ {{ member.duration_months }} Months</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Column Details Grid -->
+    <div class="row g-4">
+        <!-- Personal & Contact Information -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-person-bounding-box text-emerald-400"></i>
+                        <span>Personal & Contact Information</span>
+                    </h5>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Full Name</span>
+                        <span class="text-white font-semibold">{{ member.full_name }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Email Address</span>
+                        <span class="text-white">{{ member.email or 'Not provided' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Phone Number</span>
+                        <span class="text-emerald-400 font-semibold font-mono">{{ member.phone }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Gender</span>
+                        <span class="text-white">{{ member.gender or 'N/A' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Date of Birth / Age</span>
+                        <span class="text-white">{{ member.dob or 'N/A' }} {% if member.age %}({{ member.age }} years old){% endif %}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Residential Address</span>
+                        <span class="text-white text-end max-w-[60%]">{{ member.address or 'N/A' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2">
+                        <span class="text-slate-400 font-medium">Emergency Contact</span>
+                        <span class="text-amber-400 font-mono font-semibold">{{ member.emergency_contact or 'Not provided' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Subscription Details -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-card-checklist text-blue-400"></i>
+                        <span>Membership & Subscription Details</span>
+                    </h5>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Membership Plan</span>
+                        <span class="text-white font-semibold">{{ member.plan_name or 'N/A' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Plan Duration</span>
+                        <span class="text-white">{{ member.duration_months or 1 }} Months</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Plan Cost</span>
+                        <span class="text-emerald-400 font-bold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(member.plan_price or 0) }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Joining Date</span>
+                        <span class="text-white">{{ member.joining_date }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Start Date</span>
+                        <span class="text-white">{{ member.start_date }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">End / Expiry Date</span>
+                        <span class="font-bold {% if member.status == 'Expired' %}text-rose-400{% else %}text-white{% endif %}">{{ member.end_date }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2">
+                        <span class="text-slate-400 font-medium">Membership Status</span>
+                        <span>
+                            {% if member.status == 'Active' %}
+                                <span class="status-badge status-active">Active</span>
+                            {% elif member.status == 'Expired' %}
+                                <span class="status-badge status-expired">Expired</span>
+                            {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance History Table -->
+    <div class="app-card">
+        <div class="app-card-header">
+            <h5 class="app-card-title">
+                <i class="bi bi-calendar-check text-purple-400"></i>
+                <span>Recent Attendance History</span>
+            </h5>
+            <a href="{{ url_for('attendance_list', q=member.member_code) }}" class="text-xs text-purple-400 hover:underline font-semibold">Mark Attendance &rarr;</a>
+        </div>
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Check-in Time</th>
+                        <th>Check-out Time</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in attendances %}
+                    <tr>
+                        <td><span class="font-medium text-white">{{ a.date }}</span></td>
+                        <td><span class="text-slate-300 text-xs">{{ a.check_in or '-' }}</span></td>
+                        <td><span class="text-slate-300 text-xs">{{ a.check_out or '-' }}</span></td>
+                        <td>
+                            {% if a.status == 'Present' %}
+                                <span class="status-badge status-present">Present</span>
+                            {% else %}
+                                <span class="status-badge status-absent">Absent</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-slate-400 text-xs">{{ a.notes or '-' }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-slate-400">No attendance records logged yet for this member.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Payment Records Table -->
+    <div class="app-card">
+        <div class="app-card-header">
+            <h5 class="app-card-title">
+                <i class="bi bi-receipt text-amber-400"></i>
+                <span>Subscription Payment Records</span>
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Plan</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Method</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td><span class="font-medium text-white">{{ p.payment_date }}</span></td>
+                        <td><span class="text-slate-300">{{ p.plan_name or 'Membership Plan' }}</span></td>
+                        <td><span class="text-emerald-400 font-bold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.amount) }}</span></td>
+                        <td><span class="text-slate-300 text-xs bg-slate-800 px-2 py-1 rounded border border-slate-700">{{ p.payment_method }}</span></td>
+                        <td><span class="text-slate-400 text-xs">{{ p.notes or '-' }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-slate-400">No payment records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-slate-700">
+                <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                    <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                    Confirm Member Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start py-4">
+                <p class="text-slate-300 mb-2">Are you sure you want to delete member <strong class="text-white">{{ member.full_name }}</strong>?</p>
+                <p class="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded border border-rose-500/20">
+                    <i class="bi bi-info-circle"></i> This will delete the profile and all related attendance data.
+                </p>
+            </div>
+            <div class="modal-footer border-slate-700">
+                <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('member_delete', id=member.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-gym-danger">Delete Member</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

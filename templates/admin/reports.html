@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Reports & Analytics{% endblock %}
+{% block page_title %}Analytics & Reports{% endblock %}
+{% block breadcrumb %}Reports{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Report Type Selector Tabs -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3 no-print">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('reports', type='members', from_date=from_date, to_date=to_date) }}" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {% if report_type == 'members' %}bg-emerald-500 text-white shadow-lg shadow-emerald-500/25{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700{% endif %}">
+                <i class="bi bi-people-fill"></i> Member Report
+            </a>
+            <a href="{{ url_for('reports', type='membership', from_date=from_date, to_date=to_date) }}" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {% if report_type == 'membership' %}bg-emerald-500 text-white shadow-lg shadow-emerald-500/25{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700{% endif %}">
+                <i class="bi bi-card-checklist"></i> Membership Plans Report
+            </a>
+            <a href="{{ url_for('reports', type='trainers', from_date=from_date, to_date=to_date) }}" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {% if report_type == 'trainers' %}bg-emerald-500 text-white shadow-lg shadow-emerald-500/25{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700{% endif %}">
+                <i class="bi bi-person-badge-fill"></i> Trainer Report
+            </a>
+            <a href="{{ url_for('reports', type='enquiries', from_date=from_date, to_date=to_date) }}" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {% if report_type == 'enquiries' %}bg-emerald-500 text-white shadow-lg shadow-emerald-500/25{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700{% endif %}">
+                <i class="bi bi-chat-dots-fill"></i> Enquiry Leads Report
+            </a>
+            <a href="{{ url_for('reports', type='attendance', from_date=from_date, to_date=to_date) }}" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {% if report_type == 'attendance' %}bg-emerald-500 text-white shadow-lg shadow-emerald-500/25{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700{% endif %}">
+                <i class="bi bi-calendar-check-fill"></i> Attendance Report
+            </a>
+            <a href="{{ url_for('reports', type='revenue', from_date=from_date, to_date=to_date) }}" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all {% if report_type == 'revenue' %}bg-emerald-500 text-white shadow-lg shadow-emerald-500/25{% else %}bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700{% endif %}">
+                <i class="bi bi-currency-rupee"></i> Revenue Report
+            </a>
+        </div>
+
+        <button type="button" class="btn-gym-primary text-xs" id="printReportBtn">
+            <i class="bi bi-printer-fill"></i> Print Report
+        </button>
+    </div>
+
+    <!-- Date Range Filter Bar (no-print) -->
+    <div class="filter-bar no-print">
+        <form method="GET" action="{{ url_for('reports') }}" class="row g-3 items-end">
+            <input type="hidden" name="type" value="{{ report_type }}">
+            <div class="col-12 col-sm-4 col-md-4">
+                <label class="form-label">From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}" class="form-control" required>
+            </div>
+            <div class="col-12 col-sm-4 col-md-4">
+                <label class="form-label">To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}" class="form-control" required>
+            </div>
+            <div class="col-12 col-sm-4 col-md-4 d-flex gap-2">
+                <button type="submit" class="btn-gym-primary w-100 justify-center">
+                    <i class="bi bi-file-earmark-bar-graph"></i> Generate Report
+                </button>
+                <a href="{{ url_for('reports', type=report_type) }}" class="btn-gym-secondary" title="Reset Dates">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Printable Report Header (visible only or styled in print) -->
+    <div class="d-none d-print-block mb-4 border-b pb-3">
+        <h2 class="text-2xl font-bold">{{ gym_settings.gym_name if gym_settings else 'SETFIT GYM' }}</h2>
+        <p class="text-sm">{{ gym_settings.gym_address if gym_settings else '' }} | Phone: {{ gym_settings.gym_phone if gym_settings else '' }}</p>
+        <h4 class="text-lg font-semibold mt-2 uppercase tracking-wide">
+            {{ report_type|capitalize }} Report (Period: {{ from_date }} to {{ to_date }})
+        </h4>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- 1. MEMBER REPORT -->
+    <!-- ===================================== -->
+    {% if report_type == 'members' %}
+    <div class="space-y-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Total Enrolled in Period</span>
+                    <span class="text-2xl font-black text-white mt-1 block">{{ report_data.rows|length }} Members</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Active Members</span>
+                    <span class="text-2xl font-black text-emerald-400 mt-1 block">{{ report_data.summary.get('Active', 0) }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Expired / Inactive</span>
+                    <span class="text-2xl font-black text-rose-400 mt-1 block">{{ report_data.summary.get('Expired', 0) + report_data.summary.get('Inactive', 0) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-table-wrapper">
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Member ID</th>
+                            <th>Full Name</th>
+                            <th>Phone</th>
+                            <th>Plan</th>
+                            <th>Joining Date</th>
+                            <th>Expiry Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in report_data.rows %}
+                        <tr>
+                            <td><span class="font-mono text-emerald-400 font-bold text-xs">{{ m.member_code }}</span></td>
+                            <td><span class="font-bold text-white">{{ m.full_name }}</span></td>
+                            <td><span class="text-slate-300 font-mono text-xs">{{ m.phone }}</span></td>
+                            <td><span class="text-white">{{ m.plan_name or 'N/A' }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ m.joining_date }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ m.end_date }}</span></td>
+                            <td>
+                                {% if m.status == 'Active' %}
+                                    <span class="status-badge status-active">Active</span>
+                                {% elif m.status == 'Expired' %}
+                                    <span class="status-badge status-expired">Expired</span>
+                                {% else %}
+                                    <span class="status-badge status-inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-slate-400">No member records found for the specified date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- 2. MEMBERSHIP PLANS REPORT -->
+    <!-- ===================================== -->
+    {% elif report_type == 'membership' %}
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Plan Name</th>
+                        <th>Duration</th>
+                        <th>Price</th>
+                        <th>Total Subscribed Members</th>
+                        <th>Estimated Potential Value</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in report_data.rows %}
+                    <tr>
+                        <td><span class="font-bold text-white">{{ p.name }}</span></td>
+                        <td><span class="text-slate-300">{{ p.duration_months }} Month{{ 's' if p.duration_months > 1 else '' }}</span></td>
+                        <td><span class="text-emerald-400 font-bold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price) }}</span></td>
+                        <td><span class="text-white font-bold">{{ p.total_enrolled }} Members</span></td>
+                        <td><span class="text-amber-400 font-bold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price * p.total_enrolled) }}</span></td>
+                        <td><span class="status-badge status-active">{{ p.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- 3. TRAINERS REPORT -->
+    <!-- ===================================== -->
+    {% elif report_type == 'trainers' %}
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Trainer ID</th>
+                        <th>Coach Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Specialization</th>
+                        <th>Experience</th>
+                        <th>Joining Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in report_data.rows %}
+                    <tr>
+                        <td><span class="font-mono text-rose-400 font-bold text-xs">{{ t.trainer_code }}</span></td>
+                        <td><span class="font-bold text-white">{{ t.full_name }}</span></td>
+                        <td><span class="text-slate-300 font-mono text-xs">{{ t.phone }}</span></td>
+                        <td><span class="text-slate-400 text-xs">{{ t.email or 'N/A' }}</span></td>
+                        <td><span class="text-blue-400 font-medium">{{ t.specialization }}</span></td>
+                        <td><span class="text-white">{{ t.experience_years }} Years</span></td>
+                        <td><span class="text-slate-300 text-xs">{{ t.joining_date }}</span></td>
+                        <td><span class="status-badge status-active">{{ t.status }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-slate-400">No trainer records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- 4. ENQUIRIES REPORT -->
+    <!-- ===================================== -->
+    {% elif report_type == 'enquiries' %}
+    <div class="space-y-4">
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Total Leads</span>
+                    <span class="text-2xl font-black text-white mt-1 block">{{ report_data.rows|length }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">New Leads</span>
+                    <span class="text-2xl font-black text-blue-400 mt-1 block">{{ report_data.summary.get('New', 0) }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Converted (Joined)</span>
+                    <span class="text-2xl font-black text-emerald-400 mt-1 block">{{ report_data.summary.get('Converted', 0) }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Conversion Rate</span>
+                    <span class="text-2xl font-black text-amber-400 mt-1 block">
+                        {{ ((report_data.summary.get('Converted', 0) / (report_data.rows|length) * 100) if report_data.rows|length > 0 else 0) | round(1) }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-table-wrapper">
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Enquiry ID</th>
+                            <th>Prospect Name</th>
+                            <th>Phone</th>
+                            <th>Interested Plan</th>
+                            <th>Source</th>
+                            <th>Enquiry Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for e in report_data.rows %}
+                        <tr>
+                            <td><span class="font-mono text-cyan-400 font-bold text-xs">{{ e.enquiry_code }}</span></td>
+                            <td><span class="font-bold text-white">{{ e.full_name }}</span></td>
+                            <td><span class="text-slate-300 font-mono text-xs">{{ e.phone }}</span></td>
+                            <td><span class="text-white">{{ e.plan_name or 'General' }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ e.source or 'Walk-in' }}</span></td>
+                            <td><span class="text-slate-400 text-xs">{{ e.enquiry_date }}</span></td>
+                            <td>
+                                {% if e.status == 'New' %}
+                                    <span class="status-badge status-new">New</span>
+                                {% elif e.status == 'Contacted' %}
+                                    <span class="status-badge status-contacted">Contacted</span>
+                                {% elif e.status == 'Converted' %}
+                                    <span class="status-badge status-converted">Converted</span>
+                                {% else %}
+                                    <span class="status-badge status-closed">Closed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-slate-400">No enquiries found in the selected date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- 5. ATTENDANCE REPORT -->
+    <!-- ===================================== -->
+    {% elif report_type == 'attendance' %}
+    <div class="space-y-4">
+        <div class="row g-3">
+            <div class="col-6 col-md-4">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Total Sessions Logged</span>
+                    <span class="text-2xl font-black text-white mt-1 block">{{ report_data.rows|length }}</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-4">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Total Present</span>
+                    <span class="text-2xl font-black text-emerald-400 mt-1 block">{{ report_data.summary.get('Present', 0) }}</span>
+                </div>
+            </div>
+            <div class="col-12 col-md-4">
+                <div class="app-card !p-4">
+                    <span class="text-xs text-slate-400 font-semibold uppercase block">Total Absent</span>
+                    <span class="text-2xl font-black text-rose-400 mt-1 block">{{ report_data.summary.get('Absent', 0) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-table-wrapper">
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Member ID</th>
+                            <th>Member Name</th>
+                            <th>Plan</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in report_data.rows %}
+                        <tr>
+                            <td><span class="font-medium text-white">{{ a.date }}</span></td>
+                            <td><span class="font-mono text-emerald-400 font-bold text-xs">{{ a.member_code }}</span></td>
+                            <td><span class="font-bold text-white">{{ a.member_name }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ a.plan_name or 'N/A' }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ a.check_in or '-' }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ a.check_out or '-' }}</span></td>
+                            <td>
+                                {% if a.status == 'Present' %}
+                                    <span class="status-badge status-present">Present</span>
+                                {% else %}
+                                    <span class="status-badge status-absent">Absent</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="text-slate-400 text-xs">{{ a.notes or '-' }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-slate-400">No attendance entries recorded in this date range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================== -->
+    <!-- 6. REVENUE REPORT -->
+    <!-- ===================================== -->
+    {% elif report_type == 'revenue' %}
+    <div class="space-y-4">
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <div class="app-card !p-5 bg-gradient-to-r from-emerald-950/40 to-slate-900 border-emerald-500/30">
+                    <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider block">Total Period Revenue</span>
+                    <span class="text-3xl font-extrabold text-white mt-1 block">
+                        {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.2f}".format(report_data.total_revenue) }}
+                    </span>
+                    <span class="text-xs text-slate-400 mt-2 block">Aggregated from membership enrollment and renewal payments</span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+                <div class="app-card !p-5">
+                    <span class="text-xs text-slate-400 font-bold uppercase tracking-wider block">Total Transactions</span>
+                    <span class="text-3xl font-extrabold text-white mt-1 block">{{ report_data.total_transactions }} Payments</span>
+                    <span class="text-xs text-slate-400 mt-2 block">
+                        Average: {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format((report_data.total_revenue / report_data.total_transactions) if report_data.total_transactions > 0 else 0) }} per transaction
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-table-wrapper">
+            <div class="table-responsive">
+                <table class="app-table">
+                    <thead>
+                        <tr>
+                            <th>Payment Date</th>
+                            <th>Member ID</th>
+                            <th>Member Name</th>
+                            <th>Plan Subscribed</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for py in report_data.rows %}
+                        <tr>
+                            <td><span class="font-medium text-white">{{ py.payment_date }}</span></td>
+                            <td><span class="font-mono text-emerald-400 font-bold text-xs">{{ py.member_code }}</span></td>
+                            <td><span class="font-bold text-white">{{ py.member_name }}</span></td>
+                            <td><span class="text-slate-300 text-xs">{{ py.plan_name or 'Gym Subscription' }}</span></td>
+                            <td><span class="text-emerald-400 font-bold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(py.amount) }}</span></td>
+                            <td><span class="text-xs text-slate-300 bg-slate-800 px-2 py-1 rounded border border-slate-700">{{ py.payment_method }}</span></td>
+                            <td><span class="text-slate-400 text-xs">{{ py.notes or '-' }}</span></td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-slate-400">No revenue payment records found in this range.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Lead Pipeline & Enquiries | SETFIT DARK RAGE{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="text-muted text-decoration-none small"><i class="fas fa-arrow-left me-1"></i> Admin Dashboard</a>
+            <h2 class="text-white fw-bold text-uppercase mb-0">Free Assessment <span class="text-rage">Leads Pipeline</span></h2>
+        </div>
+    </div>
+
+    <div class="card bg-dark-card border border-dark-rage rounded-3 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="bg-black text-uppercase small text-secondary">
+                    <tr>
+                        <th class="ps-4">Prospect Name</th>
+                        <th>Contact</th>
+                        <th>Target Program</th>
+                        <th>Prospect Note / Message</th>
+                        <th>Status</th>
+                        <th>Submitted At</th>
+                        <th class="pe-4 text-end">Direct WhatsApp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if enquiries %}
+                        {% for enq in enquiries %}
+                        {% set clean_phone = enq.phone | replace(' ', '') | replace('-', '') | replace('+', '') %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="text-white fw-bold">{{ enq.full_name }}</div>
+                            </td>
+                            <td>
+                                <div class="text-light small">{{ enq.phone }}</div>
+                                <div class="text-muted extra-small">{{ enq.email or 'No email' }}</div>
+                            </td>
+                            <td><span class="badge bg-dark border border-secondary text-info">{{ enq.interested_program or 'General' }}</span></td>
+                            <td class="small text-light" style="max-width: 250px;">{{ enq.message or 'No message' }}</td>
+                            <td>
+                                <span class="badge {{ 'bg-warning text-black' if enq.status == 'new' else ('bg-success' if enq.status == 'contacted' else 'bg-secondary') }}">
+                                    {{ enq.status|upper }}
+                                </span>
+                            </td>
+                            <td class="small text-muted">{{ enq.created_at.strftime('%d %b, %H:%M') }}</td>
+                            <td class="pe-4 text-end">
+                                <a href="https://wa.me/{{ clean_phone }}?text=Hi%20{{ enq.full_name | urlencode }},%20thank%20you%20for%20requesting%20a%20Strength%20Assessment%20at%20SETFIT%20DARK%20RAGE.%20When%20would%20you%20like%20to%20schedule%20your%20VIP%20session?" target="_blank" class="btn btn-sm btn-success text-uppercase fw-bold">
+                                    <i class="fab fa-whatsapp me-1"></i> WhatsApp
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-5">No lead enquiries received yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

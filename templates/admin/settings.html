@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Gym & Admin Settings{% endblock %}
+{% block page_title %}System Settings{% endblock %}
+{% block breadcrumb %}Settings{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-xl-10">
+        <div class="space-y-6">
+            
+            <div class="d-flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h5 class="text-white font-bold mb-0">System Configuration & Profile Settings</h5>
+                    <span class="text-xs text-slate-400">Configure gym business info, administrative contact, and system options</span>
+                </div>
+                <div>
+                    <form action="{{ url_for('settings_reset') }}" method="POST" onsubmit="return confirm('Are you sure you want to reset all settings to system defaults?');">
+                        <button type="submit" class="btn-gym-secondary text-xs">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset to Defaults
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('settings') }}" class="space-y-6">
+                
+                <!-- 1. Gym Information -->
+                <div class="app-card">
+                    <div class="app-card-header">
+                        <h5 class="app-card-title">
+                            <i class="bi bi-building text-emerald-400"></i>
+                            <span>1. Gym Information</span>
+                        </h5>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Gym / Center Name <span class="text-rose-400">*</span></label>
+                            <input type="text" name="gym_name" value="{{ settings_data.gym_name if settings_data else 'SETFIT GYM' }}" class="form-control" placeholder="SETFIT GYM" required>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <label class="form-label">Gym Official Email</label>
+                            <input type="email" name="gym_email" value="{{ settings_data.gym_email if settings_data else 'info@setfitgym.com' }}" class="form-control" placeholder="info@setfitgym.com">
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Gym Support Phone</label>
+                            <input type="tel" name="gym_phone" value="{{ settings_data.gym_phone if settings_data else '+91 98765 43210' }}" class="form-control" placeholder="+91 98765 43210">
+                        </div>
+
+                        <div class="col-6 col-md-4">
+                            <label class="form-label">Opening Time</label>
+                            <input type="text" name="opening_time" value="{{ settings_data.opening_time if settings_data else '06:00 AM' }}" class="form-control" placeholder="06:00 AM">
+                        </div>
+
+                        <div class="col-6 col-md-4">
+                            <label class="form-label">Closing Time</label>
+                            <input type="text" name="closing_time" value="{{ settings_data.closing_time if settings_data else '10:00 PM' }}" class="form-control" placeholder="10:00 PM">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Gym Physical Address</label>
+                            <input type="text" name="gym_address" value="{{ settings_data.gym_address if settings_data else 'Plot 45, Fitness Boulevard, Sector 12, Pune, Maharashtra 411001' }}" class="form-control" placeholder="Full gym branch address">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Admin Profile -->
+                <div class="app-card">
+                    <div class="app-card-header">
+                        <h5 class="app-card-title">
+                            <i class="bi bi-shield-lock text-blue-400"></i>
+                            <span>2. Admin Profile</span>
+                        </h5>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Admin Name <span class="text-rose-400">*</span></label>
+                            <input type="text" name="admin_name" value="{{ settings_data.admin_name if settings_data else 'Master Admin' }}" class="form-control" required>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Admin Email <span class="text-rose-400">*</span></label>
+                            <input type="email" name="admin_email" value="{{ settings_data.admin_email if settings_data else 'admin@setfitgym.com' }}" class="form-control" required>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Admin Phone Number</label>
+                            <input type="tel" name="admin_phone" value="{{ settings_data.admin_phone if settings_data else '+91 98765 00001' }}" class="form-control">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. System Settings -->
+                <div class="app-card">
+                    <div class="app-card-header">
+                        <h5 class="app-card-title">
+                            <i class="bi bi-sliders text-amber-400"></i>
+                            <span>3. System Settings</span>
+                        </h5>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Currency Symbol</label>
+                            <select name="currency_symbol" class="form-select">
+                                <option value="₹" {% if settings_data and settings_data.currency_symbol == '₹' %}selected{% endif %}>₹ (Indian Rupee - INR)</option>
+                                <option value="$" {% if settings_data and settings_data.currency_symbol == '$' %}selected{% endif %}>$ (US Dollar - USD)</option>
+                                <option value="€" {% if settings_data and settings_data.currency_symbol == '€' %}selected{% endif %}>€ (Euro - EUR)</option>
+                                <option value="£" {% if settings_data and settings_data.currency_symbol == '£' %}selected{% endif %}>£ (British Pound - GBP)</option>
+                                <option value="AED" {% if settings_data and settings_data.currency_symbol == 'AED' %}selected{% endif %}>AED (UAE Dirham)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Date Format</label>
+                            <select name="date_format" class="form-select">
+                                <option value="YYYY-MM-DD" {% if settings_data and settings_data.date_format == 'YYYY-MM-DD' %}selected{% endif %}>YYYY-MM-DD (e.g. 2026-08-27)</option>
+                                <option value="DD/MM/YYYY" {% if settings_data and settings_data.date_format == 'DD/MM/YYYY' %}selected{% endif %}>DD/MM/YYYY (e.g. 27/08/2026)</option>
+                                <option value="MM/DD/YYYY" {% if settings_data and settings_data.date_format == 'MM/DD/YYYY' %}selected{% endif %}>MM/DD/YYYY (e.g. 08/27/2026)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-12 col-md-4">
+                            <label class="form-label">Gym Operating Status</label>
+                            <select name="gym_status" class="form-select">
+                                <option value="Open" {% if settings_data and settings_data.gym_status == 'Open' %}selected{% endif %}>Open for Business</option>
+                                <option value="Closed" {% if settings_data and settings_data.gym_status == 'Closed' %}selected{% endif %}>Temporarily Closed</option>
+                                <option value="Maintenance" {% if settings_data and settings_data.gym_status == 'Maintenance' %}selected{% endif %}>Maintenance Mode</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 pt-3">
+                    <button type="submit" class="btn-gym-primary px-5 py-2.5">
+                        <i class="bi bi-check2-circle text-lg"></i>
+                        <span>Save Changes</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

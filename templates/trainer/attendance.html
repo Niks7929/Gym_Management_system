@@ -1,0 +1,67 @@
+{% extends "trainer/base.html" %}
+
+{% block title %}Member Attendance Summary{% endblock %}
+{% block page_title %}Assigned Athletes Attendance Summary{% endblock %}
+{% block breadcrumb %}Attendance{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h6 class="font-bold text-white mb-0">Assigned Member Attendance Breakdown</h6>
+            <span class="text-xs text-slate-400">Track workout consistency and total gym check-in percentages for your athletes</span>
+        </div>
+    </div>
+
+    <!-- Attendance Table -->
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Member Code</th>
+                        <th>Member Name</th>
+                        <th>Plan</th>
+                        <th>Total Gym Visits</th>
+                        <th>Present Days</th>
+                        <th>Absent Days</th>
+                        <th>Attendance %</th>
+                        <th>Consistency Bar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in attendance_summary %}
+                    <tr>
+                        <td>
+                            <span class="font-mono text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">
+                                {{ a.member_code }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="font-bold text-white">{{ a.member_name }}</div>
+                            <span class="text-xs text-slate-400"><i class="bi bi-telephone text-emerald-400"></i> {{ a.phone }}</span>
+                        </td>
+                        <td><span class="text-slate-300 text-xs font-medium">{{ a.plan_name }}</span></td>
+                        <td><span class="text-white font-mono text-xs font-bold">{{ a.total_recorded }}</span></td>
+                        <td><span class="text-emerald-400 font-mono text-xs font-bold">{{ a.present_count }}</span></td>
+                        <td><span class="text-rose-400 font-mono text-xs font-bold">{{ a.absent_count }}</span></td>
+                        <td>
+                            <span class="text-xs font-mono font-bold text-cyan-400">{{ a.percentage }}%</span>
+                        </td>
+                        <td class="w-48">
+                            <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                                <div class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-3 rounded-full transition-all" style="width: {{ a.percentage }}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-slate-400">No attendance data available for assigned members.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

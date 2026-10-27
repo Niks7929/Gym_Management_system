@@ -1,0 +1,440 @@
+{% extends "base.html" %}
+
+{% block title %}SETFIT GYM | Transform Yourself{% endblock %}
+
+{% block content %}
+<!-- =========================================================================
+     1. HERO SECTION (Full-Screen Image Slideshow + Strong Fitness Headline)
+     ========================================================================= -->
+<section class="hero-slider-section position-relative d-flex align-items-center justify-content-center text-center text-white min-vh-100 overflow-hidden">
+    <!-- Slideshow Background Images (6 Diverse High-Res Gym Categories) -->
+    <!-- 1. Modern Gym Interior -->
+    <div class="hero-bg-slide active" style="background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920&auto=format&fit=crop');"></div>
+    <!-- 2. Strength & Barbell Training -->
+    <div class="hero-bg-slide" style="background-image: url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1920&auto=format&fit=crop');"></div>
+    <!-- 3. Weight Training & Dumbbells -->
+    <div class="hero-bg-slide" style="background-image: url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=1920&auto=format&fit=crop');"></div>
+    <!-- 4. Personal Training Mentorship -->
+    <div class="hero-bg-slide" style="background-image: url('https://images.unsplash.com/photo-1574680096145-d05b474e2155?q=80&w=1920&auto=format&fit=crop');"></div>
+    <!-- 5. Cardio & High-Intensity Conditioning -->
+    <div class="hero-bg-slide" style="background-image: url('https://images.unsplash.com/photo-1540497077202-7c8a3999166f?q=80&w=1920&auto=format&fit=crop');"></div>
+    <!-- 6. Professional Fitness Equipment & Racks -->
+    <div class="hero-bg-slide" style="background-image: url('https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?q=80&w=1920&auto=format&fit=crop');"></div>
+    
+    <!-- Hero Dark Readability Overlay -->
+    <div class="hero-overlay"></div>
+
+    <!-- Manual Navigation Arrows -->
+    <button id="heroPrevBtn" class="hero-nav-arrow hero-nav-prev d-none d-md-flex" type="button" aria-label="Previous Slide">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button id="heroNextBtn" class="hero-nav-arrow hero-nav-next d-none d-md-flex" type="button" aria-label="Next Slide">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <!-- Slide Indicators -->
+    <div class="hero-indicators-wrapper">
+        <div class="hero-indicator active" data-slide="0" role="button" aria-label="Slide 1"></div>
+        <div class="hero-indicator" data-slide="1" role="button" aria-label="Slide 2"></div>
+        <div class="hero-indicator" data-slide="2" role="button" aria-label="Slide 3"></div>
+        <div class="hero-indicator" data-slide="3" role="button" aria-label="Slide 4"></div>
+        <div class="hero-indicator" data-slide="4" role="button" aria-label="Slide 5"></div>
+        <div class="hero-indicator" data-slide="5" role="button" aria-label="Slide 6"></div>
+    </div>
+
+    <!-- Hero Main Content (Guaranteed Visible Layer) -->
+    <div class="container hero-content-wrapper py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-11 col-xl-10">
+                <h1 class="hero-main-title">
+                    SETFIT <span class="highlight-red">GYM</span>
+                </h1>
+                
+                <h2 class="hero-subtitle">
+                    TRANSFORM YOURSELF
+                </h2>
+                
+                <p class="hero-description">
+                    Build muscle, lose fat, and push beyond your limits with certified coaches, heavy iron equipment, and smart digital progress tracking.
+                </p>
+                
+                <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
+                    <a href="#memberships" class="btn btn-rage btn-lg text-uppercase fw-bold px-5 py-3 shadow-lg fs-6">
+                        <i class="fas fa-bolt me-2"></i> Join Now / View Plans
+                    </a>
+                    <a href="{{ url_for('auth.portal') }}" class="btn btn-rage-outline btn-lg text-uppercase fw-bold px-5 py-3 fs-6">
+                        <i class="fas fa-sign-in-alt me-2"></i> Member Portal Login
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Scroll Down Indicator -->
+    <div class="position-absolute bottom-0 start-50 translate-middle-x mb-2 text-center d-none d-sm-block" style="z-index: 6;">
+        <a href="#about" class="text-white-50 hover-rage text-decoration-none" aria-label="Scroll to About section">
+            <small class="text-uppercase tracking-wider d-block mb-1" style="font-size: 0.65rem;">Explore</small>
+            <i class="fas fa-chevron-down animate-bounce"></i>
+        </a>
+    </div>
+</section>
+
+
+<!-- =========================================================================
+     2. ABOUT SETFIT GYM
+     ========================================================================= -->
+<section id="about" class="py-5 border-bottom border-dark-rage">
+    <div class="container py-5">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge bg-dark-card border border-dark-rage text-rage px-3 py-2 text-uppercase mb-2">About Us</span>
+                <h2 class="display-5 fw-bold text-uppercase mb-4 text-rage">
+                    ABOUT <span class="border-bottom border-dark-rage">SETFIT GYM</span>
+                </h2>
+                <p class="text-gray mb-4 fs-5 lh-lg">
+                    SETFIT GYM combines professional fitness coaching with smart digital management. Members can track workouts, customize diet plans, log biometric attendance, and achieve peak athletic results.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="#why-choose-us" class="btn btn-rage-outline px-4 py-2 text-uppercase fw-bold">Why Choose Us</a>
+                    <a href="#memberships" class="btn btn-rage px-4 py-2 text-uppercase fw-bold">View Memberships</a>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="p-4 bg-dark-card border border-dark-rage rounded-3 feature-box h-100">
+                            <i class="fas fa-dumbbell text-rage fs-2 mb-3"></i>
+                            <h5 class="fw-bold text-uppercase mb-2 text-rage">Elite Equipment</h5>
+                            <p class="small text-muted mb-0">Calibrated Olympic barbells, power racks, ISO-lateral machines & cardio ergs.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-4 bg-dark-card border border-dark-rage rounded-3 feature-box h-100">
+                            <i class="fas fa-user-shield text-rage fs-2 mb-3"></i>
+                            <h5 class="fw-bold text-uppercase mb-2 text-rage">Certified Coaches</h5>
+                            <p class="small text-muted mb-0">ISSA and biomechanics certified coaches dedicated to form and progressive overload.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-4 bg-dark-card border border-dark-rage rounded-3 feature-box h-100">
+                            <i class="fas fa-qrcode text-rage fs-2 mb-3"></i>
+                            <h5 class="fw-bold text-uppercase mb-2 text-rage">Digital QR Access</h5>
+                            <p class="small text-muted mb-0">Contactless turnstile biometric QR check-in and attendance logging.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-4 bg-dark-card border border-dark-rage rounded-3 feature-box h-100">
+                            <i class="fas fa-shield-alt text-rage fs-2 mb-3"></i>
+                            <h5 class="fw-bold text-uppercase mb-2 text-rage">Secure Portals</h5>
+                            <p class="small text-muted mb-0">Separate terminals for Members, Trainers, and Administration.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =========================================================================
+     3. WHY CHOOSE US (6 Core Cards)
+     ========================================================================= -->
+<section id="why-choose-us" class="py-5 bg-darker border-bottom border-dark-rage">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-dark-card border border-dark-rage text-rage px-3 py-2 text-uppercase mb-2">Our Pillars</span>
+            <h2 class="display-5 fw-bold text-uppercase text-rage">WHY <span class="text-muted">CHOOSE US</span></h2>
+            <p class="text-muted max-w-600 mx-auto">Engineered to provide complete athletic training and smart fitness management.</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 1. Professional Training -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 p-4 rounded-3 feature-box">
+                    <div class="text-rage fs-2 mb-3"><i class="fas fa-dumbbell"></i></div>
+                    <h5 class="fw-bold text-uppercase mb-2 text-rage">Professional Training</h5>
+                    <p class="text-muted small mb-0">High-caliber strength, bodybuilding, powerlifting, and endurance coaching supervised by seasoned fitness mentors.</p>
+                </div>
+            </div>
+
+            <!-- 2. Smart Fitness Tracking -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 p-4 rounded-3 feature-box">
+                    <div class="text-rage fs-2 mb-3"><i class="fas fa-laptop-medical"></i></div>
+                    <h5 class="fw-bold text-uppercase mb-2 text-rage">Smart Fitness Tracking</h5>
+                    <p class="text-muted small mb-0">Real-time digital dashboard tracking workout split completion, personal records, and monthly consistency streaks.</p>
+                </div>
+            </div>
+
+            <!-- 3. Personalized Workout -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 p-4 rounded-3 feature-box">
+                    <div class="text-rage fs-2 mb-3"><i class="fas fa-clipboard-list"></i></div>
+                    <h5 class="fw-bold text-uppercase mb-2 text-rage">Personalized Workout</h5>
+                    <p class="text-muted small mb-0">Targeted exercise splits, rep ranges, intensity management, and rest intervals customized to your body type.</p>
+                </div>
+            </div>
+
+            <!-- 4. Diet Guidance -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 p-4 rounded-3 feature-box">
+                    <div class="text-rage fs-2 mb-3"><i class="fas fa-apple-alt"></i></div>
+                    <h5 class="fw-bold text-uppercase mb-2 text-rage">Diet Guidance</h5>
+                    <p class="text-muted small mb-0">Macro targets (Protein, Carbs, Healthy Fats), caloric breakdown, meal scheduling, and nutritional blueprints.</p>
+                </div>
+            </div>
+
+            <!-- 5. Attendance Tracking -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 p-4 rounded-3 feature-box">
+                    <div class="text-rage fs-2 mb-3"><i class="fas fa-calendar-check"></i></div>
+                    <h5 class="fw-bold text-uppercase mb-2 text-rage">Attendance Tracking</h5>
+                    <p class="text-muted small mb-0">Fast turnstile biometric QR check-ins, monthly attendance calendar, and gym visit history reports.</p>
+                </div>
+            </div>
+
+            <!-- 6. Progress Tracking -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 p-4 rounded-3 feature-box">
+                    <div class="text-rage fs-2 mb-3"><i class="fas fa-chart-line"></i></div>
+                    <h5 class="fw-bold text-uppercase mb-2 text-rage">Progress Tracking</h5>
+                    <p class="text-muted small mb-0">Continuous monitoring of body composition, strength adaptations, visceral fat, and athletic milestones.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =========================================================================
+     4. MEMBERSHIP PLANS (6 Unique Plans from Database - No Duplicates)
+     ========================================================================= -->
+<section id="memberships" class="py-5 border-bottom border-dark-rage">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-dark-card border border-dark-rage text-rage px-3 py-2 text-uppercase mb-2">Pricing Packages</span>
+            <h2 class="display-5 fw-bold text-uppercase text-rage">MEMBERSHIP <span class="text-muted">PLANS</span></h2>
+            <p class="text-muted max-w-600 mx-auto">Select a plan to initiate your membership. All memberships include digital QR access and floor amenities.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% for plan in plans %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 bg-dark-card border {{ 'border-rage shadow-rage' if plan.name == 'Premium Annual VIP' else 'border-dark-rage' }} rounded-3 overflow-hidden position-relative plan-card">
+                    {% if plan.name == 'Premium Annual VIP' %}
+                    <div class="position-absolute top-0 end-0 bg-rage text-inverse text-uppercase fw-bold px-3 py-1 small rounded-bottom-start">
+                        VIP Tier
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge bg-dark-card border border-dark-rage text-rage text-uppercase">{{ plan.duration_months }} {% if plan.duration_months == 1 %}Month{% else %}Months{% endif %}</span>
+                            <h4 class="fw-bold text-uppercase mt-2 mb-0 text-rage">{{ plan.name }}</h4>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <span class="display-6 fw-bold text-rage">₹{{ "{:,.0f}".format(plan.price) }}</span>
+                            <span class="text-muted small">/ {{ plan.duration_months }} {% if plan.duration_months == 1 %}Month{% else %}Months{% endif %}</span>
+                        </div>
+                        
+                        <p class="text-muted small mb-4">{{ plan.description }}</p>
+                        
+                        <ul class="list-unstyled d-flex flex-column gap-2 mb-4 small text-gray flex-grow-1">
+                            {% if plan.features_list %}
+                                {% for feat in plan.features_list %}
+                                <li class="d-flex align-items-center">
+                                    <i class="fas fa-check text-rage me-2"></i> {{ feat }}
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Unlimited Gym Access</li>
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Fitness Assessment</li>
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Trainer Support</li>
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Digital Workout Dashboard</li>
+                            {% endif %}
+                        </ul>
+                        
+                        <a href="{{ url_for('auth.register', plan_id=plan.id) }}" class="btn {{ 'btn-rage' if plan.name == 'Premium Annual VIP' else 'btn-rage-outline' }} w-100 py-2 text-uppercase fw-bold">
+                            Join Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+<!-- =========================================================================
+     5. TRAINERS / FITNESS ROSTER
+     ========================================================================= -->
+{% if trainers %}
+<section id="trainers" class="py-5 bg-darker border-bottom border-dark-rage">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-dark-card border border-dark-rage text-rage px-3 py-2 text-uppercase mb-2">Faculty</span>
+            <h2 class="display-5 fw-bold text-uppercase text-rage">CERTIFIED <span class="text-muted">TRAINERS</span></h2>
+            <p class="text-muted max-w-600 mx-auto">Mentorship from proven fitness professionals and sports biomechanics coaches.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% for t in trainers %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage rounded-3 overflow-hidden h-100 feature-box">
+                    <div class="bg-darker d-flex align-items-center justify-content-center py-5 border-bottom border-dark-rage">
+                        <i class="fas fa-user-ninja text-muted display-3"></i>
+                    </div>
+                    <div class="card-body p-4">
+                        <span class="badge bg-dark-card border border-dark-rage text-rage small text-uppercase mb-2">{{ t.specialization or 'Strength & Conditioning' }}</span>
+                        <h4 class="fw-bold text-uppercase mb-1 text-rage">{{ t.user.full_name if t.user else 'Coach' }}</h4>
+                        <p class="small text-muted mb-3">{{ t.experience_years }}+ Years Elite Experience</p>
+                        <p class="text-gray small mb-0">{{ t.bio or 'Dedicated to engineering athletic performance and strength through progressive overload.' }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- =========================================================================
+     6. SMART GYM MANAGEMENT FEATURES
+     ========================================================================= -->
+<section class="py-5 border-bottom border-dark-rage">
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <span class="badge bg-dark-card border border-dark-rage text-rage px-3 py-2 text-uppercase mb-2">Operations</span>
+            <h2 class="display-5 fw-bold text-uppercase text-rage">SMART GYM <span class="text-muted">MANAGEMENT</span></h2>
+            <p class="text-muted max-w-600 mx-auto">Unified operations connecting athletes, trainers, and executive administrators.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-id-card text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Membership Management</h6>
+                    <p class="small text-muted mb-0">Digital passes, renewals & invoices.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-users-cog text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Trainer Management</h6>
+                    <p class="small text-muted mb-0">Client rosters, splits & shifts.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-calendar-check text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Attendance Tracking</h6>
+                    <p class="small text-muted mb-0">Biometric QR check-in & visit logs.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-dumbbell text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Workout Plans</h6>
+                    <p class="small text-muted mb-0">Personalized routines & splits.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-utensils text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Diet Plans</h6>
+                    <p class="small text-muted mb-0">Caloric targets & macro breakdowns.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-tasks text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Progress Tracking</h6>
+                    <p class="small text-muted mb-0">Body composition & workout streaks.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-receipt text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Payment Verification</h6>
+                    <p class="small text-muted mb-0">UPI UTR verification queue.</p>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="p-3 bg-dark-card border border-dark-rage rounded-3 text-center feature-box h-100">
+                    <i class="fas fa-headset text-rage fs-3 mb-2"></i>
+                    <h6 class="fw-bold text-uppercase mb-1 text-rage">Enquiry Management</h6>
+                    <p class="small text-muted mb-0">Lead capturing & contact requests.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- =========================================================================
+     7. CONTACT & LOCATION SECTION
+     ========================================================================= -->
+<section id="contact" class="py-5 bg-darker">
+    <div class="container py-5">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-7">
+                <span class="badge bg-dark-card border border-dark-rage text-rage px-3 py-2 text-uppercase mb-3 fw-bold">Location & Hours</span>
+                <h2 class="display-5 fw-bold text-uppercase mb-4 text-rage">
+                    CONTACT <span class="text-muted">SETFIT GYM - KARVE NAGAR</span>
+                </h2>
+                <p class="text-muted mb-4 fs-6">
+                    Our facility is engineered for high-intensity training, certified coaching, and comprehensive digital tracking. Contact our front desk or submit an enquiry online.
+                </p>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="bg-dark-card p-3 rounded border border-dark-rage text-rage">
+                            <i class="fas fa-map-marker-alt fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1 text-rage">Gym Address</h6>
+                            <p class="text-muted small mb-0">{{ gym_settings.address if gym_settings else 'Near Pratibha Society, Karve Nagar, Pune, Maharashtra 411052' }}</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="bg-dark-card p-3 rounded border border-dark-rage text-rage">
+                            <i class="fas fa-clock fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1 text-rage">Operating Hours</h6>
+                            <p class="text-muted small mb-0">Monday – Saturday: 05:30 AM – 11:00 PM &nbsp;|&nbsp; Sunday: 06:00 AM – 08:00 PM</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="bg-dark-card p-3 rounded border border-dark-rage text-rage">
+                            <i class="fas fa-phone-alt fs-4"></i>
+                        </div>
+                        <div>
+                            <h6 class="text-uppercase fw-bold mb-1 text-rage">Direct Contact</h6>
+                            <p class="text-muted small mb-0">{{ gym_settings.contact_phone if gym_settings else '+91 98765 43210' }} &nbsp;|&nbsp; {{ gym_settings.contact_email if gym_settings else 'contact@setfitgym.com' }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 text-center text-lg-start">
+                <div class="p-4 p-md-5 bg-dark-card border border-dark-rage rounded-4 shadow-lg">
+                    <i class="fas fa-envelope-open-text text-rage display-4 mb-3"></i>
+                    <h3 class="fw-bold text-uppercase mb-2 text-rage">Have Questions?</h3>
+                    <p class="text-muted small mb-4">Visit our dedicated enquiry page to request a callback or ask questions regarding membership packages and personal training.</p>
+                    <a href="{{ url_for('public.contact') }}" class="btn btn-rage w-100 py-3 text-uppercase fw-bold">
+                        <i class="fas fa-paper-plane me-2"></i> Contact Us Online
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/hero_slider.js') }}"></script>
+{% endblock %}

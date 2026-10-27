@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}404 Page Not Found | SETFIT DARK RAGE{% endblock %}
+
+{% block content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-black py-5 text-center">
+    <div class="container">
+        <div class="max-w-600 mx-auto p-5 bg-dark-card border border-dark-rage rounded-4 shadow-lg">
+            <div class="display-1 fw-bold text-rage mb-2">404</div>
+            <h2 class="text-white fw-bold text-uppercase mb-3">Target Not Found</h2>
+            <p class="text-muted mb-4">The route or resource you are attempting to access does not exist on this server.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a href="{{ url_for('public.index') }}" class="btn btn-rage text-uppercase fw-bold">Return Home</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

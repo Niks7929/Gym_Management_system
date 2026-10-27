@@ -1,0 +1,157 @@
+{% extends "trainer/base.html" %}
+
+{% block title %}Member Profile - {{ member.full_name }}{% endblock %}
+{% block page_title %}Member Overview{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('trainer_members') }}">Members</a> / {{ member.full_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Member Profile Header Card -->
+    <div class="app-card border border-slate-700 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
+        <div class="d-flex flex-wrap items-center justify-between gap-4">
+            <div class="d-flex items-center gap-4">
+                <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white text-3xl font-black shadow-lg">
+                    {{ member.full_name[0] }}
+                </div>
+                <div>
+                    <div class="d-flex items-center gap-2">
+                        <h3 class="text-xl sm:text-2xl font-black text-white mb-0">{{ member.full_name }}</h3>
+                        <span class="font-mono text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">
+                            {{ member.member_code }}
+                        </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mb-1 mt-1">
+                        <span>{{ member.gender or 'N/A' }}</span> &bull; 
+                        <span>{{ member.age or 'N/A' }} years old</span> &bull; 
+                        <span class="text-emerald-400 font-mono"><i class="bi bi-telephone"></i> {{ member.phone }}</span>
+                    </p>
+                    <span class="text-xs bg-slate-800 px-3 py-1 rounded text-slate-300 font-medium border border-slate-700">
+                        Fitness Goal: <strong class="text-amber-400">{{ member.fitness_goal or 'General Fitness' }}</strong>
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('trainer_workouts', member_id=member.id) }}" class="btn-gym-primary text-xs py-2 px-3">
+                    <i class="bi bi-activity"></i> Add Workout Plan
+                </a>
+                <a href="{{ url_for('trainer_diet', member_id=member.id) }}" class="btn-gym-secondary text-xs py-2 px-3">
+                    <i class="bi bi-egg-fried text-purple-400"></i> Add Diet Plan
+                </a>
+                <a href="{{ url_for('trainer_progress', member_id=member.id) }}" class="btn-gym-secondary text-xs py-2 px-3">
+                    <i class="bi bi-bar-chart-line text-emerald-400"></i> Log Progress
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="row g-4">
+        <!-- Assigned Workouts -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-activity text-emerald-400"></i>
+                        <span>Assigned Workout Routine</span>
+                    </h5>
+                </div>
+                <div class="space-y-3">
+                    {% for w in workouts %}
+                    <div class="p-3 bg-slate-900 rounded-xl border border-slate-700 space-y-2">
+                        <div class="d-flex justify-between items-center">
+                            <h6 class="font-bold text-white mb-0 text-sm">{{ w.workout_name }}</h6>
+                            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                {{ w.difficulty }}
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-0"><strong>Exercises:</strong> {{ w.exercises }}</p>
+                        <div class="d-flex justify-between text-xs text-slate-400 font-mono pt-1 border-t border-slate-800">
+                            <span>Sets: {{ w.sets }} &bull; Reps: {{ w.reps }}</span>
+                            <span>Duration: {{ w.duration or '60m' }}</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-slate-400 py-4 text-center">No workout routine assigned yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Diet Plan -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-egg-fried text-purple-400"></i>
+                        <span>Assigned Diet & Nutrition</span>
+                    </h5>
+                </div>
+                <div class="space-y-3">
+                    {% for d in diet_plans %}
+                    <div class="p-3 bg-slate-900 rounded-xl border border-slate-700 space-y-1">
+                        <div class="d-flex justify-between items-center">
+                            <span class="font-bold text-white text-sm">{{ d.meal_name }}</span>
+                            <span class="text-xs font-mono text-cyan-400"><i class="bi bi-clock"></i> {{ d.timing }}</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mb-1"><strong>Food:</strong> {{ d.food_items }} ({{ d.quantity }})</p>
+                        <div class="d-flex gap-3 text-xs text-slate-400 font-mono">
+                            <span>Calories: <strong class="text-amber-400">{{ d.calories }} kcal</strong></span>
+                            <span>Protein: <strong class="text-emerald-400">{{ d.protein }}g</strong></span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-xs text-slate-400 py-4 text-center">No diet plan assigned yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Member Progress History -->
+    <div class="app-card">
+        <div class="app-card-header">
+            <h5 class="app-card-title">
+                <i class="bi bi-bar-chart-line text-cyan-400"></i>
+                <span>Recorded Transformation Progress</span>
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Weight</th>
+                        <th>Height</th>
+                        <th>BMI</th>
+                        <th>Body Fat %</th>
+                        <th>Chest / Waist</th>
+                        <th>Strength Level</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in progress_history %}
+                    <tr>
+                        <td><span class="font-mono text-xs text-amber-400">{{ p.progress_date }}</span></td>
+                        <td><strong class="text-white font-mono text-xs">{{ p.weight }} kg</strong></td>
+                        <td><span class="text-slate-300 font-mono text-xs">{{ p.height }} cm</span></td>
+                        <td><span class="text-emerald-400 font-mono text-xs font-bold">{{ p.bmi }}</span></td>
+                        <td><span class="text-cyan-400 font-mono text-xs">{{ p.body_fat }}%</span></td>
+                        <td><span class="text-slate-300 text-xs">{{ p.chest or '-' }}" / {{ p.waist or '-' }}"</span></td>
+                        <td><span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-white">{{ p.strength_level or 'Normal' }}</span></td>
+                        <td><span class="text-xs text-slate-400 block max-w-[200px] truncate">{{ p.notes or '-' }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-slate-400">No progress entries recorded yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

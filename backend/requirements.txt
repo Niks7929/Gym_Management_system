@@ -1,0 +1,9 @@
+Django>=5.0
+django-ninja>=1.1.0
+pydantic>=2.6.0
+pyjwt>=2.8.0
+bcrypt>=4.1.0
+django-cors-headers>=4.3.0
+python-dotenv>=1.0.0
+pymysql>=1.1.0
+cryptography>=42.0.0

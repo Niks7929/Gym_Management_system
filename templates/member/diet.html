@@ -1,0 +1,71 @@
+{% extends "member/base.html" %}
+
+{% block title %}My Diet Plan{% endblock %}
+{% block page_title %}Assigned Diet & Nutrition Suggestions{% endblock %}
+{% block breadcrumb %}Diet Plan{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h6 class="font-bold text-white mb-0">My Custom Meal & Nutrition Schedule</h6>
+            <span class="text-xs text-slate-400">View dietary plans and macro breakdowns assigned by your coach</span>
+        </div>
+    </div>
+
+    <!-- Diet Cards Grid -->
+    <div class="row g-4">
+        {% for d in diet_plans %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="app-card h-100 border border-slate-800 space-y-3">
+                <div class="d-flex justify-between items-center">
+                    <span class="text-xs font-bold text-purple-400 bg-purple-500/10 px-2.5 py-1 rounded border border-purple-500/20">
+                        {{ d.meal_name }}
+                    </span>
+                    <span class="text-xs font-mono text-amber-400"><i class="bi bi-clock"></i> {{ d.timing or 'Anytime' }}</span>
+                </div>
+
+                <div>
+                    <h5 class="text-white font-bold text-base mb-1">{{ d.food_items }}</h5>
+                    <span class="text-xs text-slate-400">Portion / Quantity: <strong class="text-white">{{ d.quantity or '1 Serving' }}</strong></span>
+                </div>
+
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1 text-xs">
+                    <div class="text-slate-400 font-semibold mb-1">Macro Nutrients Breakdown:</div>
+                    <div class="grid grid-cols-4 gap-1 text-center font-mono">
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">KCAL</span>
+                            <strong class="text-amber-400 text-xs">{{ d.calories }}</strong>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">PROTEIN</span>
+                            <strong class="text-emerald-400 text-xs">{{ d.protein }}g</strong>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">CARBS</span>
+                            <strong class="text-cyan-400 text-xs">{{ d.carbs }}g</strong>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">FAT</span>
+                            <strong class="text-purple-400 text-xs">{{ d.fat }}g</strong>
+                        </div>
+                    </div>
+                </div>
+
+                {% if d.notes %}
+                <p class="text-xs text-slate-300 mb-0 font-italic bg-slate-900/40 p-2 rounded border border-slate-800">
+                    <i class="bi bi-chat-left-text text-emerald-400"></i> Coach Tip: "{{ d.notes }}"
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-8 text-slate-400">
+            <i class="bi bi-egg-fried text-3xl text-slate-500 mb-2 block"></i>
+            <h5>No Diet Plan Assigned Yet</h5>
+            <p class="text-xs text-slate-400">Your trainer will assign your customized nutrition plan soon!</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}My Nutrition Blueprint | Athlete Hub{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a href="{{ url_for('member.dashboard') }}" class="text-muted text-decoration-none small"><i class="fas fa-arrow-left me-1"></i> Athlete Hub</a>
+            <h2 class="text-white fw-bold text-uppercase mb-0">Assigned <span class="text-rage">Nutrition Blueprint</span></h2>
+        </div>
+    </div>
+
+    {% if diet %}
+    <div class="card bg-dark-card border border-dark-rage rounded-4 p-4 p-md-5 mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+            <div>
+                <span class="badge bg-rage text-white text-uppercase px-3 py-1 mb-2">{{ diet.goal }}</span>
+                <h3 class="text-white fw-bold text-uppercase mb-0">{{ diet.title }}</h3>
+            </div>
+            <div class="text-end">
+                <span class="display-5 fw-bold text-white">{{ diet.target_calories }}</span>
+                <span class="text-muted small d-block">Daily Target (kCal)</span>
+            </div>
+        </div>
+
+        <!-- Macro Breakdown -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="p-3 bg-black border border-danger rounded-3 text-center">
+                    <span class="text-muted small text-uppercase d-block">Protein Target</span>
+                    <span class="fs-4 fw-bold text-danger">{{ diet.protein_grams or 180 }} grams</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 bg-black border border-warning rounded-3 text-center">
+                    <span class="text-muted small text-uppercase d-block">Carbohydrates Target</span>
+                    <span class="fs-4 fw-bold text-warning">{{ diet.carbs_grams or 280 }} grams</span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-3 bg-black border border-info rounded-3 text-center">
+                    <span class="text-muted small text-uppercase d-block">Healthy Fats Target</span>
+                    <span class="fs-4 fw-bold text-info">{{ diet.fats_grams or 65 }} grams</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-light mb-4">{{ diet.description }}</p>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover align-middle mb-0">
+                <thead class="bg-black text-secondary extra-small text-uppercase">
+                    <tr>
+                        <th class="ps-3">Meal Slot</th>
+                        <th>Recommended Timing</th>
+                        <th>Prescribed Foods & Portion Weights</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if diet.meals %}
+                        {% for meal in diet.meals %}
+                        <tr>
+                            <td class="ps-3 fw-bold text-rage">{{ meal.name }}</td>
+                            <td class="text-muted small">{{ meal.timing }}</td>
+                            <td class="text-light small">{{ meal.food_items }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">No meal breakdowns configured for this plan yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="card bg-dark-card border border-dark-rage p-5 text-center rounded-4">
+        <i class="fas fa-utensils fs-1 text-secondary mb-3"></i>
+        <h4 class="text-white fw-bold">No Nutrition Blueprint Assigned</h4>
+        <p class="text-muted small mb-0">Your coach will calculate your daily caloric targets and macronutrient split based on your body composition scan.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

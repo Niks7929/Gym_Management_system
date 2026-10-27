@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Membership Plans Configuration | SETFIT DARK RAGE{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="text-muted text-decoration-none small"><i class="fas fa-arrow-left me-1"></i> Admin Dashboard</a>
+            <h2 class="text-white fw-bold text-uppercase mb-0">Membership <span class="text-rage">Plans (₹)</span></h2>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for plan in plans %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card bg-dark-card border {{ 'border-rage' if plan.name == 'PREMIUM' else 'border-dark-rage' }} rounded-3 h-100 p-4 d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge bg-dark border border-secondary text-info">{{ plan.duration_months }} Months</span>
+                    {% if plan.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Disabled</span>
+                    {% endif %}
+                </div>
+                
+                <h3 class="text-white fw-bold text-uppercase mt-2 mb-1">{{ plan.name }}</h3>
+                <div class="display-6 fw-bold text-rage mb-3">₹{{ "{:,.0f}".format(plan.price) }}</div>
+                
+                <p class="text-muted small mb-4 flex-grow-1">{{ plan.description }}</p>
+                
+                <div class="border-top border-dark pt-3 mt-auto">
+                    <form action="{{ url_for('admin.update_plan', plan_id=plan.id) }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <div class="input-group mb-2">
+                            <span class="input-group-text bg-black border-secondary text-secondary">₹</span>
+                            <input type="number" name="price" class="form-control bg-black text-white border-secondary" value="{{ plan.price }}" required>
+                            <button type="submit" class="btn btn-rage btn-sm text-uppercase">Update</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

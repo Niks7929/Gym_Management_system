@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}Enquiries & Leads{% endblock %}
+{% block page_title %}Enquiries Management{% endblock %}
+{% block breadcrumb %}Enquiries{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+    <!-- Top Action & Status Filter Badges -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('enquiries_list') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if not status_filter %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                All Enquiries ({{ counts.total }})
+            </a>
+            <a href="{{ url_for('enquiries_list', status='New', q=search_query, date=date_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'New' %}bg-blue-500/20 text-blue-400 border border-blue-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                New Leads ({{ counts.new }})
+            </a>
+            <a href="{{ url_for('enquiries_list', status='Contacted', q=search_query, date=date_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'Contacted' %}bg-amber-500/20 text-amber-400 border border-amber-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                Contacted ({{ counts.contacted }})
+            </a>
+            <a href="{{ url_for('enquiries_list', status='Converted', q=search_query, date=date_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'Converted' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                Converted ({{ counts.converted }})
+            </a>
+            <a href="{{ url_for('enquiries_list', status='Closed', q=search_query, date=date_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'Closed' %}bg-slate-500/20 text-slate-300 border border-slate-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                Closed ({{ counts.closed }})
+            </a>
+        </div>
+
+        <div>
+            <a href="{{ url_for('enquiry_add') }}" class="btn-gym-primary">
+                <i class="bi bi-chat-plus-fill"></i>
+                <span>Add Enquiry</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('enquiries_list') }}" class="row g-3 items-end">
+            <div class="col-12 col-md-5">
+                <label class="form-label">Search Lead</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-slate-900 border-slate-700 text-slate-400">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by name, phone, email, code...">
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label">Filter by Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="New" {% if status_filter == 'New' %}selected{% endif %}>New</option>
+                    <option value="Contacted" {% if status_filter == 'Contacted' %}selected{% endif %}>Contacted</option>
+                    <option value="Converted" {% if status_filter == 'Converted' %}selected{% endif %}>Converted</option>
+                    <option value="Closed" {% if status_filter == 'Closed' %}selected{% endif %}>Closed</option>
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label">Filter Date</label>
+                <input type="date" name="date" value="{{ date_filter }}" class="form-control">
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn-gym-primary w-100 justify-center">
+                    <i class="bi bi-funnel-fill"></i> Filter
+                </button>
+                {% if search_query or status_filter or date_filter %}
+                <a href="{{ url_for('enquiries_list') }}" class="btn-gym-secondary" title="Reset Filters">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Enquiries Table -->
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Enquiry ID</th>
+                        <th>Prospect Name</th>
+                        <th>Contact</th>
+                        <th>Interested Plan</th>
+                        <th>Enquiry Date</th>
+                        <th>Source</th>
+                        <th>Status</th>
+                        <th class="text-center">Quick Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for e in enquiries %}
+                    <tr>
+                        <td>
+                            <span class="font-mono text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded border border-cyan-500/20">
+                                {{ e.enquiry_code }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="font-bold text-white">{{ e.full_name }}</div>
+                            <span class="text-xs text-slate-400 max-w-[200px] truncate block">{{ e.message or 'No specific message' }}</span>
+                        </td>
+                        <td>
+                            <div class="text-xs text-slate-200 font-semibold"><i class="bi bi-telephone text-emerald-400"></i> {{ e.phone }}</div>
+                            <div class="text-xs text-slate-400">{{ e.email or 'N/A' }}</div>
+                        </td>
+                        <td>
+                            <span class="text-white font-medium text-xs">{{ e.plan_name or 'General Enquiry' }}</span>
+                        </td>
+                        <td><span class="text-slate-300 text-xs font-medium">{{ e.enquiry_date }}</span></td>
+                        <td>
+                            <span class="text-xs text-slate-300 bg-slate-800 px-2 py-1 rounded border border-slate-700">
+                                {{ e.source or 'Walk-in' }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if e.status == 'New' %}
+                                <span class="status-badge status-new">New</span>
+                            {% elif e.status == 'Contacted' %}
+                                <span class="status-badge status-contacted">Contacted</span>
+                            {% elif e.status == 'Converted' %}
+                                <span class="status-badge status-converted">Converted</span>
+                            {% else %}
+                                <span class="status-badge status-closed">Closed</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-1 items-center">
+                                <!-- Status change dropdown shortcuts -->
+                                <div class="dropdown">
+                                    <button class="table-action-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Change Status">
+                                        <i class="bi bi-arrow-repeat text-amber-400"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-dark border-slate-700 text-xs shadow-lg">
+                                        <li><h6 class="dropdown-header text-slate-400">Change Status To:</h6></li>
+                                        <li><a class="dropdown-item py-1.5" href="{{ url_for('enquiry_set_status', id=e.id, status_val='contacted') }}"><i class="bi bi-telephone-outbound text-amber-400"></i> Mark as Contacted</a></li>
+                                        <li><a class="dropdown-item py-1.5" href="{{ url_for('enquiry_set_status', id=e.id, status_val='converted') }}"><i class="bi bi-person-check text-emerald-400"></i> Mark as Converted</a></li>
+                                        <li><a class="dropdown-item py-1.5" href="{{ url_for('enquiry_set_status', id=e.id, status_val='closed') }}"><i class="bi bi-x-circle text-slate-400"></i> Mark as Closed</a></li>
+                                    </ul>
+                                </div>
+
+                                <a href="{{ url_for('enquiry_view', id=e.id) }}" class="table-action-btn" title="View Enquiry">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('enquiry_edit', id=e.id) }}" class="table-action-btn btn-edit" title="Edit Enquiry">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="table-action-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteEnquiryModal{{ e.id }}" title="Delete Enquiry">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Delete Modal -->
+                            <div class="modal fade" id="deleteEnquiryModal{{ e.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header border-slate-700">
+                                            <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                                                <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                                                Confirm Lead Deletion
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-start py-4">
+                                            <p class="text-slate-300 mb-2">Are you sure you want to delete enquiry from <strong class="text-white">{{ e.full_name }}</strong>?</p>
+                                        </div>
+                                        <div class="modal-footer border-slate-700">
+                                            <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('enquiry_delete', id=e.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn-gym-danger">Delete Enquiry</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-slate-400">
+                            No enquiries found matching your criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

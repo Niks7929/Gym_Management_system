@@ -1,0 +1,206 @@
+{% extends "trainer/base.html" %}
+
+{% block title %}Trainer Dashboard{% endblock %}
+{% block page_title %}Trainer Overview{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- 1. Quick Trainer Action Bar -->
+    <div class="app-card !p-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-slate-700">
+        <div class="d-flex flex-wrap items-center justify-between gap-3">
+            <div class="d-flex items-center gap-2">
+                <span class="p-2 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <i class="bi bi-lightning-charge-fill text-lg"></i>
+                </span>
+                <div>
+                    <h6 class="mb-0 font-bold text-white text-sm">Trainer Quick Actions</h6>
+                    <span class="text-xs text-slate-400">Fast tools to manage assigned members & workout plans</span>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('trainer_progress') }}" class="quick-action-btn">
+                    <i class="bi bi-bar-chart-line-fill text-emerald-400"></i>
+                    <span>Update Progress</span>
+                </a>
+                <a href="{{ url_for('trainer_notes') }}" class="quick-action-btn">
+                    <i class="bi bi-journal-plus text-cyan-400"></i>
+                    <span>Add Private Note</span>
+                </a>
+                <a href="{{ url_for('trainer_workouts') }}" class="quick-action-btn">
+                    <i class="bi bi-activity text-amber-400"></i>
+                    <span>Add Workout Plan</span>
+                </a>
+                <a href="{{ url_for('trainer_diet') }}" class="quick-action-btn">
+                    <i class="bi bi-egg-fried text-purple-400"></i>
+                    <span>Add Diet Plan</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Trainer Metrics Statistics Cards -->
+    <div class="row g-4">
+        <!-- Assigned Members -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-cyan">
+                <div class="stat-card-top">
+                    <span class="stat-title">Assigned Members</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.assigned_members }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-person-check text-cyan-400"></i>
+                    <span>Active Athletes Under Supervision</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Sessions -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-amber">
+                <div class="stat-card-top">
+                    <span class="stat-title">Today's Sessions</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-stopwatch-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.todays_sessions }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-clock-history text-amber-400"></i>
+                    <span>Scheduled for Today</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completed Sessions -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-emerald">
+                <div class="stat-card-top">
+                    <span class="stat-title">Completed Sessions</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.completed_sessions }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-check2-all text-emerald-400"></i>
+                    <span>Sessions Marked Done</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Sessions -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-rose">
+                <div class="stat-card-top">
+                    <span class="stat-title">Pending Sessions</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.pending_sessions }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-hourglass-split text-rose-400"></i>
+                    <span>Upcoming or Scheduled</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Rate % -->
+        <div class="col-12 col-sm-6 col-xl">
+            <div class="stat-card stat-purple">
+                <div class="stat-card-top">
+                    <span class="stat-title">Attendance Rate</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-percent"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.attendance_rate }}%</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-graph-up-arrow text-purple-400"></i>
+                    <span>Average Assigned Attendance</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Assigned Members Table with Quick Actions -->
+    <div class="app-card">
+        <div class="app-card-header">
+            <h5 class="app-card-title">
+                <i class="bi bi-people-fill text-amber-400"></i>
+                <span>Assigned Athletes / Members List</span>
+            </h5>
+            <a href="{{ url_for('trainer_members') }}" class="text-xs text-amber-400 font-semibold hover:underline">View All Members &rarr;</a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Member Code</th>
+                        <th>Member Name</th>
+                        <th>Contact</th>
+                        <th>Plan</th>
+                        <th>Fitness Goal</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                    <tr>
+                        <td>
+                            <span class="font-mono text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">
+                                {{ m.member_code }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="font-bold text-white">{{ m.full_name }}</div>
+                            <span class="text-xs text-slate-400">{{ m.gender or 'N/A' }} &bull; {{ m.age or 'N/A' }} yrs</span>
+                        </td>
+                        <td>
+                            <div class="text-xs text-slate-200 font-mono"><i class="bi bi-telephone text-emerald-400"></i> {{ m.phone }}</div>
+                            <div class="text-xs text-slate-400">{{ m.email or 'N/A' }}</div>
+                        </td>
+                        <td><span class="text-white text-xs font-medium">{{ m.plan_name or 'Standard' }}</span></td>
+                        <td><span class="text-slate-300 text-xs bg-slate-800 px-2.5 py-1 rounded border border-slate-700">{{ m.fitness_goal or 'General Fitness' }}</span></td>
+                        <td><span class="text-slate-400 text-xs font-mono">{{ m.end_date }}</span></td>
+                        <td>
+                            {% if m.status == 'Active' %}
+                                <span class="status-badge status-active">Active</span>
+                            {% else %}
+                                <span class="status-badge status-expired">Expired</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex flex-wrap gap-1 justify-center">
+                                <a href="{{ url_for('trainer_member_detail', id=m.id) }}" class="px-2 py-1 rounded bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 border border-amber-500/30 text-xs font-semibold" title="View Detail Profile">
+                                    <i class="bi bi-person-lines-fill"></i> View
+                                </a>
+                                <a href="{{ url_for('trainer_workouts', member_id=m.id) }}" class="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/30 text-xs font-semibold" title="Add Workout">
+                                    <i class="bi bi-activity"></i> Workout
+                                </a>
+                                <a href="{{ url_for('trainer_progress', member_id=m.id) }}" class="px-2 py-1 rounded bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 border border-cyan-500/30 text-xs font-semibold" title="Record Progress">
+                                    <i class="bi bi-bar-chart"></i> Progress
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-slate-400">No members currently assigned to you.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

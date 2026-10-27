@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Members Directory{% endblock %}
+{% block page_title %}Members Management{% endblock %}
+{% block breadcrumb %}Members{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+    <!-- Top Action & Overview Row -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div class="d-flex flex-wrap gap-2">
+            <a href="{{ url_for('members_list') }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if not status_filter %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                All Members ({{ counts.total }})
+            </a>
+            <a href="{{ url_for('members_list', status='Active', q=search_query, plan_id=plan_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'Active' %}bg-emerald-500/20 text-emerald-400 border border-emerald-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                Active ({{ counts.active }})
+            </a>
+            <a href="{{ url_for('members_list', status='Expired', q=search_query, plan_id=plan_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'Expired' %}bg-rose-500/20 text-rose-400 border border-rose-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                Expired ({{ counts.expired }})
+            </a>
+            <a href="{{ url_for('members_list', status='Inactive', q=search_query, plan_id=plan_filter) }}" class="px-3 py-1.5 rounded-lg text-xs font-bold {% if status_filter == 'Inactive' %}bg-slate-500/20 text-slate-300 border border-slate-500/30{% else %}bg-slate-800 text-slate-400 border border-slate-700{% endif %}">
+                Inactive ({{ counts.inactive }})
+            </a>
+        </div>
+
+        <div>
+            <a href="{{ url_for('member_add') }}" class="btn-gym-primary">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Add Member</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('members_list') }}" class="row g-3 items-end">
+            <div class="col-12 col-md-5">
+                <label class="form-label">Search Member</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-slate-900 border-slate-700 text-slate-400">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by name, phone, email, or member ID...">
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label">Filter by Plan</label>
+                <select name="plan_id" class="form-select">
+                    <option value="">All Membership Plans</option>
+                    {% for p in plans %}
+                    <option value="{{ p.id }}" {% if plan_filter == p.id|string %}selected{% endif %}>{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if status_filter == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="Expired" {% if status_filter == 'Expired' %}selected{% endif %}>Expired</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn-gym-primary w-100 justify-center">
+                    <i class="bi bi-funnel-fill"></i> Filter
+                </button>
+                {% if search_query or status_filter or plan_filter %}
+                <a href="{{ url_for('members_list') }}" class="btn-gym-secondary" title="Reset Filters">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Members Table -->
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table" id="membersTable">
+                <thead>
+                    <tr>
+                        <th>Member ID</th>
+                        <th>Full Name</th>
+                        <th>Contact</th>
+                        <th>Gender / Age</th>
+                        <th>Membership Plan</th>
+                        <th>Joining Date</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for m in members %}
+                    <tr>
+                        <td>
+                            <span class="font-mono text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                                {{ m.member_code }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="font-bold text-white">{{ m.full_name }}</div>
+                            <span class="text-xs text-slate-400"><i class="bi bi-geo-alt"></i> {{ m.address or 'No address added' }}</span>
+                        </td>
+                        <td>
+                            <div class="text-xs text-slate-200 font-semibold"><i class="bi bi-telephone text-emerald-400"></i> {{ m.phone }}</div>
+                            <div class="text-xs text-slate-400">{{ m.email or 'N/A' }}</div>
+                        </td>
+                        <td>
+                            <span class="text-slate-300">{{ m.gender or '-' }}</span>
+                            <span class="text-slate-500 text-xs">({{ m.age ~ ' yrs' if m.age else '-' }})</span>
+                        </td>
+                        <td>
+                            <div class="text-white font-medium">{{ m.plan_name or 'No Plan Assigned' }}</div>
+                            {% if m.plan_price %}
+                            <span class="text-xs text-emerald-400 font-semibold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(m.plan_price) }}</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-slate-300 text-xs font-medium">{{ m.joining_date }}</span></td>
+                        <td>
+                            <span class="text-xs font-medium {% if m.status == 'Expired' %}text-rose-400{% else %}text-slate-300{% endif %}">
+                                {{ m.end_date }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if m.status == 'Active' %}
+                                <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Active</span>
+                            {% elif m.status == 'Expired' %}
+                                <span class="status-badge status-expired"><i class="bi bi-exclamation-circle-fill"></i> Expired</span>
+                            {% else %}
+                                <span class="status-badge status-inactive"><i class="bi bi-dash-circle-fill"></i> Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ url_for('member_view', id=m.id) }}" class="table-action-btn" title="View Member Profile">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('member_edit', id=m.id) }}" class="table-action-btn btn-edit" title="Edit Member">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="table-action-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal{{ m.id }}" title="Delete Member">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Delete Confirmation Modal -->
+                            <div class="modal fade" id="deleteModal{{ m.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header border-slate-700">
+                                            <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                                                <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                                                Confirm Member Deletion
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-start py-4">
+                                            <p class="text-slate-300 mb-2">Are you sure you want to delete member <strong class="text-white">{{ m.full_name }}</strong> (<span class="text-emerald-400">{{ m.member_code }}</span>)?</p>
+                                            <p class="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded border border-rose-500/20">
+                                                <i class="bi bi-info-circle"></i> This will permanently remove all member records, attendance, and subscription payments.
+                                            </p>
+                                        </div>
+                                        <div class="modal-footer border-slate-700">
+                                            <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('member_delete', id=m.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn-gym-danger">Delete Member</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-slate-400">
+                            <i class="bi bi-person-x text-3xl text-slate-500 mb-2 block"></i>
+                            No members found matching your search and filter criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

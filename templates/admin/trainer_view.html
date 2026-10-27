@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Trainer Profile - {{ trainer.full_name }}{% endblock %}
+{% block page_title %}Trainer Profile{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('trainers_list') }}">Trainers</a> / {{ trainer.full_name }}{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Header Action Bar -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <a href="{{ url_for('trainers_list') }}" class="btn-gym-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Trainers
+        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('trainer_edit', id=trainer.id) }}" class="btn-gym-primary">
+                <i class="bi bi-pencil-square"></i> Edit Profile
+            </a>
+            <button type="button" class="btn-gym-danger" data-bs-toggle="modal" data-bs-target="#deleteTrainerModal">
+                <i class="bi bi-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+
+    <!-- Trainer Hero Card -->
+    <div class="app-card bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-slate-700">
+        <div class="d-flex flex-wrap items-center justify-between gap-4">
+            <div class="d-flex items-center gap-4">
+                <div class="w-20 h-20 rounded-2xl bg-gradient-to-tr from-rose-600 to-amber-500 flex items-center justify-center text-white text-3xl font-extrabold shadow-lg shadow-rose-500/20">
+                    {{ trainer.full_name[:1].upper() }}
+                </div>
+                <div>
+                    <div class="d-flex items-center gap-3">
+                        <h2 class="text-2xl font-bold text-white mb-0">{{ trainer.full_name }}</h2>
+                        {% if trainer.status == 'Active' %}
+                            <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Active Coach</span>
+                        {% else %}
+                            <span class="status-badge status-inactive">Inactive</span>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-wrap items-center gap-3 mt-1 text-sm text-slate-400">
+                        <span class="font-mono text-rose-400 font-bold bg-slate-950/60 px-2 py-0.5 rounded border border-slate-700">
+                            {{ trainer.trainer_code }}
+                        </span>
+                        <span><i class="bi bi-award text-amber-400"></i> {{ trainer.specialization }}</span>
+                        <span><i class="bi bi-calendar-check"></i> Joined {{ trainer.joining_date }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-700 text-end min-w-[180px]">
+                <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block">Coaching Experience</span>
+                <span class="text-2xl font-black text-white block">{{ trainer.experience_years }} Years</span>
+                <span class="text-xs text-rose-400 font-medium">Professional Trainer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Column Details Grid -->
+    <div class="row g-4">
+        <!-- Personal & Contact Information -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-person-lines-fill text-rose-400"></i>
+                        <span>Personal & Contact Info</span>
+                    </h5>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Full Name</span>
+                        <span class="text-white font-semibold">{{ trainer.full_name }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Email Address</span>
+                        <span class="text-white">{{ trainer.email or 'Not provided' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Phone Number</span>
+                        <span class="text-emerald-400 font-semibold font-mono">{{ trainer.phone }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Gender</span>
+                        <span class="text-white">{{ trainer.gender or 'N/A' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Date of Birth</span>
+                        <span class="text-white">{{ trainer.dob or 'N/A' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2">
+                        <span class="text-slate-400 font-medium">Residential Address</span>
+                        <span class="text-white text-end max-w-[60%]">{{ trainer.address or 'Pune' }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Qualifications & Coaching Profile -->
+        <div class="col-12 col-lg-6">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-trophy text-amber-400"></i>
+                        <span>Certifications & Specialization</span>
+                    </h5>
+                </div>
+                <div class="space-y-3 text-sm">
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Primary Specialization</span>
+                        <span class="text-rose-400 font-bold">{{ trainer.specialization }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Experience</span>
+                        <span class="text-white font-semibold">{{ trainer.experience_years }} Years Practical Training</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Certifications</span>
+                        <span class="text-white font-medium text-end max-w-[60%]">{{ trainer.qualification or 'Certified Personal Fitness Trainer' }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2 border-b border-slate-700/60">
+                        <span class="text-slate-400 font-medium">Joining Date</span>
+                        <span class="text-white">{{ trainer.joining_date }}</span>
+                    </div>
+                    <div class="d-flex justify-between py-2">
+                        <span class="text-slate-400 font-medium">Current Status</span>
+                        <span>
+                            {% if trainer.status == 'Active' %}
+                                <span class="status-badge status-active">Active</span>
+                            {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTrainerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-slate-700">
+                <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                    <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                    Confirm Trainer Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start py-4">
+                <p class="text-slate-300 mb-2">Are you sure you want to remove coach <strong class="text-white">{{ trainer.full_name }}</strong>?</p>
+            </div>
+            <div class="modal-footer border-slate-700">
+                <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('trainer_delete', id=trainer.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-gym-danger">Delete Trainer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

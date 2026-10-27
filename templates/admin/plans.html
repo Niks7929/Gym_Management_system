@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}Membership Plans{% endblock %}
+{% block page_title %}Membership Plans{% endblock %}
+{% block breadcrumb %}Plans{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Top Action Row -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h6 class="font-bold text-white mb-0">Gym Pricing & Subscription Packages</h6>
+            <span class="text-xs text-slate-400">Manage package tiers, durations, and pricing</span>
+        </div>
+        <div>
+            <a href="{{ url_for('plan_add') }}" class="btn-gym-primary">
+                <i class="bi bi-plus-square-fill"></i>
+                <span>Add Membership Plan</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Pricing Cards Grid -->
+    <div class="row g-4">
+        {% for p in plans %}
+        <div class="col-12 col-md-6 col-xl-3">
+            <div class="plan-pricing-card">
+                {% if p.duration_months == 12 %}
+                <div class="plan-badge-featured">BEST VALUE</div>
+                {% endif %}
+                <div class="d-flex justify-between items-start">
+                    <div>
+                        <h5 class="text-white font-bold mb-1">{{ p.name }}</h5>
+                        <span class="text-xs text-slate-400"><i class="bi bi-clock-history"></i> {{ p.duration_months }} Month{{ 's' if p.duration_months > 1 else '' }} Duration</span>
+                    </div>
+                    {% if p.status == 'Active' %}
+                        <span class="status-badge status-active">Active</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </div>
+
+                <div class="plan-price-tag">
+                    {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price) }}
+                </div>
+                <div class="text-xs text-slate-400 mb-3">
+                    Billed per package cycle
+                </div>
+
+                <p class="text-xs text-slate-300 flex-1 mb-4">
+                    {{ p.description or 'Complete fitness access package with cardio and weights.' }}
+                </p>
+
+                <div class="pt-3 border-t border-slate-700/60 d-flex items-center justify-between text-xs">
+                    <span class="text-slate-400"><i class="bi bi-people-fill text-emerald-400"></i> {{ p.total_members }} Members</span>
+                    <div class="d-flex gap-1">
+                        <a href="{{ url_for('plan_edit', id=p.id) }}" class="table-action-btn btn-edit" title="Edit Plan">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <button type="button" class="table-action-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deletePlanModal{{ p.id }}" title="Delete Plan">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Delete Confirmation Modal -->
+            <div class="modal fade" id="deletePlanModal{{ p.id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header border-slate-700">
+                            <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                                <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                                Confirm Plan Deletion
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body text-start py-4">
+                            <p class="text-slate-300 mb-2">Are you sure you want to delete <strong class="text-white">{{ p.name }}</strong>?</p>
+                            {% if p.total_members > 0 %}
+                            <p class="text-xs text-rose-400 bg-rose-500/10 p-2.5 rounded border border-rose-500/20">
+                                <i class="bi bi-exclamation-triangle"></i> Warning: {{ p.total_members }} members are currently associated with this plan.
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="modal-footer border-slate-700">
+                            <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <form action="{{ url_for('plan_delete', id=p.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn-gym-danger">Delete Plan</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5 text-slate-400">
+            No membership plans found. Click "Add Membership Plan" to create one.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Plans Table View -->
+    <div class="app-card">
+        <div class="app-card-header">
+            <h5 class="app-card-title">
+                <i class="bi bi-table text-emerald-400"></i>
+                <span>Plans Comparison & Records</span>
+            </h5>
+        </div>
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Plan Name</th>
+                        <th>Duration</th>
+                        <th>Price</th>
+                        <th>Description</th>
+                        <th>Enrolled Members</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in plans %}
+                    <tr>
+                        <td><span class="font-bold text-white">{{ p.name }}</span></td>
+                        <td><span class="text-slate-300 font-medium">{{ p.duration_months }} Month{{ 's' if p.duration_months > 1 else '' }}</span></td>
+                        <td><span class="text-emerald-400 font-bold">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price) }}</span></td>
+                        <td><span class="text-slate-400 text-xs">{{ p.description or '-' }}</span></td>
+                        <td><span class="text-white font-semibold">{{ p.total_members }}</span></td>
+                        <td>
+                            {% if p.status == 'Active' %}
+                                <span class="status-badge status-active">Active</span>
+                            {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ url_for('plan_edit', id=p.id) }}" class="table-action-btn btn-edit" title="Edit Plan">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="table-action-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deletePlanModal{{ p.id }}" title="Delete Plan">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

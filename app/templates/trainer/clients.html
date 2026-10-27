@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Assigned Athletes | Trainer Terminal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a href="{{ url_for('trainer.dashboard') }}" class="text-muted text-decoration-none small"><i class="fas fa-arrow-left me-1"></i> Trainer Dashboard</a>
+            <h2 class="text-main fw-bold text-uppercase mb-0">Assigned <span class="text-rage">Athletes Roster</span></h2>
+        </div>
+        <div>
+            <button class="btn btn-rage text-uppercase fw-bold" data-bs-toggle="modal" data-bs-target="#assignClientModal">
+                <i class="fas fa-user-plus me-1"></i> Add Athlete to Roster
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% if clients %}
+            {% for client in clients %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage rounded-3 p-4 h-100 d-flex flex-column feature-box">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="avatar-circle bg-black border border-dark-rage text-rage fw-bold rounded-circle d-flex align-items-center justify-content-center fs-4" style="width: 50px; height: 50px;">
+                            {{ client.full_name[0]|upper if client.full_name else 'A' }}
+                        </div>
+                        <div>
+                            <h5 class="text-main fw-bold mb-0">{{ client.full_name }}</h5>
+                            <span class="badge bg-black border border-dark-rage text-info font-monospace">{{ client.member_profile.member_code if client.member_profile else 'MEMBER' }}</span>
+                        </div>
+                    </div>
+
+                    <ul class="list-unstyled text-secondary small d-flex flex-column gap-2 mb-4 flex-grow-1">
+                        <li><i class="fas fa-envelope text-muted me-2"></i> {{ client.email }}</li>
+                        <li><i class="fas fa-phone text-muted me-2"></i> {{ client.phone or 'N/A' }}</li>
+                        <li><i class="fas fa-ambulance text-danger me-2"></i> Emerg: {{ client.member_profile.emergency_contact if client.member_profile else 'N/A' }}</li>
+                        <li><i class="fas fa-notes-medical text-warning me-2"></i> Health: {{ client.member_profile.medical_conditions if client.member_profile and client.member_profile.medical_conditions else 'None reported' }}</li>
+                    </ul>
+
+                    <div class="d-flex gap-2 pt-3 border-top border-dark-rage mt-auto">
+                        <a href="{{ url_for('trainer.workouts') }}" class="btn btn-outline-light btn-sm flex-fill text-uppercase fw-semibold"><i class="fas fa-dumbbell me-1"></i> Program Split</a>
+                        <a href="{{ url_for('trainer.diets') }}" class="btn btn-rage btn-sm flex-fill text-uppercase fw-semibold"><i class="fas fa-utensils me-1"></i> Nutrition</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center text-muted py-5">
+                <div class="card bg-dark-card border border-dark-rage p-5 rounded-4 shadow-sm">
+                    <i class="fas fa-user-friends fs-1 text-muted mb-3"></i>
+                    <h4 class="text-main fw-bold text-uppercase">No athletes assigned to your roster yet.</h4>
+                    <p class="small text-muted mb-3">Select any registered gym athlete to add them to your training roster.</p>
+                    <button class="btn btn-rage btn-sm text-uppercase fw-bold mx-auto" data-bs-toggle="modal" data-bs-target="#assignClientModal">
+                        <i class="fas fa-user-plus me-1"></i> Add Athlete Now
+                    </button>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal to assign athlete to roster -->
+<div class="modal fade" id="assignClientModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content bg-dark-card border border-dark-rage text-secondary">
+            <div class="modal-header border-dark-rage">
+                <h5 class="modal-title text-main text-uppercase fw-bold"><i class="fas fa-user-plus me-2 text-rage"></i> Add Athlete to Roster</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('trainer.assign_client') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase">Select Registered Gym Athlete</label>
+                        <select name="member_id" class="form-select" required>
+                            <option value="" disabled selected>-- Select Member --</option>
+                            {% for member in all_members %}
+                                <option value="{{ member.id }}">{{ member.full_name }} ({{ member.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase">Coaching Notes / Focus</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="e.g. Focus on strength progression, hypertrophy split, and nutrition tracking..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-dark-rage">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-rage btn-sm text-uppercase fw-bold">Add to Roster</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

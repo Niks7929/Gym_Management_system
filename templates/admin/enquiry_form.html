@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Edit Enquiry - {{ enquiry.full_name }}{% else %}Add Enquiry{% endif %}{% endblock %}
+{% block page_title %}{% if is_edit %}Edit Lead Details{% else %}Record New Enquiry{% endif %}{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('enquiries_list') }}">Enquiries</a> / {% if is_edit %}Edit #{{ enquiry_id }}{% else %}New Lead{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-7">
+        <div class="app-card">
+            <div class="app-card-header">
+                <h5 class="app-card-title">
+                    <i class="bi bi-chat-left-dots-fill text-cyan-400"></i>
+                    <span>{% if is_edit %}Update Lead: {{ enquiry.full_name }} ({{ enquiry.enquiry_code }}){% else %}New Prospect / Lead Details{% endif %}</span>
+                </h5>
+                <a href="{{ url_for('enquiries_list') }}" class="btn-gym-secondary text-xs">
+                    <i class="bi bi-arrow-left"></i> Back to Enquiries
+                </a>
+            </div>
+
+            <form method="POST" action="{% if is_edit %}{{ url_for('enquiry_edit', id=enquiry_id) }}{% else %}{{ url_for('enquiry_add') }}{% endif %}" class="space-y-4">
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Prospect Name <span class="text-rose-400">*</span></label>
+                        <input type="text" name="full_name" value="{{ enquiry.full_name or '' }}" class="form-control" placeholder="e.g. Rahul Sharma" required>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Phone Number <span class="text-rose-400">*</span></label>
+                        <input type="tel" name="phone" value="{{ enquiry.phone or '' }}" class="form-control" placeholder="+91 98765 43210" required>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" value="{{ enquiry.email or '' }}" class="form-control" placeholder="e.g. prospect@example.com">
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <label class="form-label">Interested Membership Plan</label>
+                        <select name="plan_id" class="form-select">
+                            <option value="">-- General / Undecided --</option>
+                            {% for p in plans %}
+                            <option value="{{ p.id }}" {% if enquiry.plan_id|string == p.id|string %}selected{% endif %}>
+                                {{ p.name }} ({{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price) }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Enquiry Date <span class="text-rose-400">*</span></label>
+                        <input type="date" name="enquiry_date" value="{{ enquiry.enquiry_date or today_date }}" class="form-control" required>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Lead Source</label>
+                        <select name="source" class="form-select">
+                            <option value="Walk-in" {% if enquiry.source == 'Walk-in' %}selected{% endif %}>Walk-in</option>
+                            <option value="Instagram" {% if enquiry.source == 'Instagram' %}selected{% endif %}>Instagram</option>
+                            <option value="Facebook" {% if enquiry.source == 'Facebook' %}selected{% endif %}>Facebook</option>
+                            <option value="Google Search" {% if enquiry.source == 'Google Search' %}selected{% endif %}>Google Search</option>
+                            <option value="Referral" {% if enquiry.source == 'Referral' %}selected{% endif %}>Friend Referral</option>
+                            <option value="Flyer/Banner" {% if enquiry.source == 'Flyer/Banner' %}selected{% endif %}>Flyer/Banner</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-4">
+                        <label class="form-label">Lead Status</label>
+                        <select name="status" class="form-select">
+                            <option value="New" {% if enquiry.status == 'New' %}selected{% endif %}>New</option>
+                            <option value="Contacted" {% if enquiry.status == 'Contacted' %}selected{% endif %}>Contacted</option>
+                            <option value="Converted" {% if enquiry.status == 'Converted' %}selected{% endif %}>Converted (Joined)</option>
+                            <option value="Closed" {% if enquiry.status == 'Closed' %}selected{% endif %}>Closed / Lost</option>
+                        </select>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Message / Inquiry Details</label>
+                        <textarea name="message" rows="3" class="form-control" placeholder="Specify prospect fitness goals, questions, preferred timings...">{{ enquiry.message or '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-3 pt-3 border-t border-slate-700">
+                    <a href="{{ url_for('enquiries_list') }}" class="btn-gym-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
+                    <button type="submit" class="btn-gym-primary px-4">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>{% if is_edit %}Save Changes{% else %}Save Enquiry{% endif %}</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

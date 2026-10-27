@@ -1,0 +1,154 @@
+{% extends "member/base.html" %}
+
+{% block title %}Payments & Dues{% endblock %}
+{% block page_title %}Payments & Subscriptions Desk{% endblock %}
+{% block breadcrumb %}Payments{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- Payment Summary -->
+    <div class="row g-4">
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="stat-card stat-emerald">
+                <div class="stat-card-top">
+                    <span class="stat-title">Total Subscription Fee Paid</span>
+                    <div class="stat-icon-wrapper"><i class="bi bi-wallet2"></i></div>
+                </div>
+                <div class="stat-number text-emerald-400">
+                    {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(total_paid) }}
+                </div>
+                <div class="stat-subtext"><span>All Successful Payments</span></div>
+            </div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="stat-card stat-amber">
+                <div class="stat-card-top">
+                    <span class="stat-title">Pending Payment Dues</span>
+                    <div class="stat-icon-wrapper"><i class="bi bi-exclamation-circle-fill"></i></div>
+                </div>
+                <div class="stat-number text-amber-400">
+                    {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(pending_dues) }}
+                </div>
+                <div class="stat-subtext"><span>Awaiting Front-Desk Settlement</span></div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4 d-flex items-center">
+            <div class="app-card w-full text-center p-4 bg-gradient-to-r from-slate-900 to-slate-800 border border-slate-700">
+                <h6 class="font-bold text-white mb-2">Need to Make a Payment?</h6>
+                <p class="text-xs text-slate-400 mb-4">Submit a digital payment request or pay at the gym front desk.</p>
+                <button type="button" class="btn-gym-primary w-100 py-2.5 text-xs font-bold" data-bs-toggle="modal" data-bs-target="#payNowModal">
+                    <i class="bi bi-credit-card-fill"></i> Pay Now / Submit Payment Request
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments History Table -->
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Payment Date</th>
+                        <th>Plan / Item</th>
+                        <th>Amount</th>
+                        <th>Payment Method</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in payments %}
+                    <tr>
+                        <td><span class="font-mono text-xs font-bold text-cyan-400">{{ p.transaction_id or 'TXN-' ~ p.id }}</span></td>
+                        <td><span class="font-mono text-xs text-slate-300">{{ p.payment_date }}</span></td>
+                        <td><span class="text-white text-xs font-medium">{{ p.plan_name or 'Membership Plan' }}</span></td>
+                        <td>
+                            <strong class="text-emerald-400 font-mono text-xs">
+                                {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.amount) }}
+                            </strong>
+                        </td>
+                        <td><span class="text-xs bg-slate-800 px-2 py-0.5 rounded text-slate-300 border border-slate-700">{{ p.payment_method }}</span></td>
+                        <td>
+                            {% if p.status == 'Paid' %}
+                                <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Paid</span>
+                            {% else %}
+                                <span class="status-badge status-contacted"><i class="bi bi-clock-history"></i> Pending Request</span>
+                            {% endif %}
+                        </td>
+                        <td><span class="text-xs text-slate-400 block max-w-[180px] truncate">{{ p.notes or '-' }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-slate-400">No payment records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Pay Now -->
+<div class="modal fade" id="payNowModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-start">
+            <form action="{{ url_for('member_pay_now') }}" method="POST">
+                <div class="modal-header border-slate-700">
+                    <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                        <i class="bi bi-credit-card-fill text-emerald-400"></i> Submit Gym Payment Request
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body space-y-3 py-4">
+                    <p class="text-xs text-slate-300">Enter your payment details below to generate an instant payment receipt request for front desk verification.</p>
+                    
+                    <div>
+                        <label class="form-label text-xs">Payment For (Plan Package) <span class="text-rose-400">*</span></label>
+                        <select name="plan_id" class="form-select" required>
+                            {% for p in plans %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-xs">Amount <span class="text-rose-400">*</span></label>
+                            <input type="number" step="1" name="amount" value="1500" class="form-control" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-xs">Payment Method</label>
+                            <select name="payment_method" class="form-select">
+                                <option value="UPI">UPI / GPay / PhonePe</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="Net Banking">Net Banking</option>
+                                <option value="Cash">Cash at Front Desk</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label text-xs">UPI Transaction ID / Ref No.</label>
+                        <input type="text" name="transaction_id" class="form-control" placeholder="e.g. UPI/3910293102/SETFIT">
+                    </div>
+
+                    <div>
+                        <label class="form-label text-xs">Payment Notes</label>
+                        <input type="text" name="notes" class="form-control" placeholder="e.g. Paid online via UPI app">
+                    </div>
+                </div>
+                <div class="modal-footer border-slate-700">
+                    <button type="button" class="btn-gym-secondary text-xs" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-gym-primary text-xs">Submit Payment Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

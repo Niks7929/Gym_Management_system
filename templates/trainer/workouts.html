@@ -1,0 +1,166 @@
+{% extends "trainer/base.html" %}
+
+{% block title %}Workout Suggestions{% endblock %}
+{% block page_title %}Assign Workout Suggestions{% endblock %}
+{% block breadcrumb %}Workouts{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h6 class="font-bold text-white mb-0">Workout Suggestions & Exercise Routines</h6>
+            <span class="text-xs text-slate-400">Design and assign workout plans for your athletes</span>
+        </div>
+        <button type="button" class="btn-gym-primary" data-bs-toggle="modal" data-bs-target="#addWorkoutModal">
+            <i class="bi bi-plus-circle-fill"></i> Add Workout Suggestion
+        </button>
+    </div>
+
+    <!-- Workout Suggestions Grid -->
+    <div class="row g-4">
+        {% for w in workouts %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="app-card h-100 border border-slate-800 space-y-3">
+                <div class="d-flex justify-between items-center">
+                    <span class="text-xs font-bold text-amber-400 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">
+                        {{ w.workout_type or 'General Workout' }}
+                    </span>
+                    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        {{ w.difficulty }}
+                    </span>
+                </div>
+
+                <div>
+                    <h5 class="text-white font-bold text-base mb-1">{{ w.workout_name }}</h5>
+                    <span class="text-xs text-slate-400">Assigned to: <strong class="text-white">{{ w.member_name }}</strong></span>
+                </div>
+
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1 text-xs">
+                    <div class="text-slate-400 font-semibold mb-1">Exercises:</div>
+                    <div class="text-slate-200 leading-relaxed">{{ w.exercises }}</div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-2 text-center text-xs text-slate-300 font-mono py-2 bg-slate-900/60 rounded-lg border border-slate-800">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">SETS</span>
+                        <strong class="text-white">{{ w.sets }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">REPS</span>
+                        <strong class="text-emerald-400">{{ w.reps }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 block">DURATION</span>
+                        <strong class="text-cyan-400">{{ w.duration or '45m' }}</strong>
+                    </div>
+                </div>
+
+                {% if w.notes %}
+                <p class="text-xs text-slate-400 mb-0 font-italic">
+                    <i class="bi bi-chat-quote text-amber-400"></i> "{{ w.notes }}"
+                </p>
+                {% endif %}
+
+                <div class="pt-2 border-t border-slate-800 d-flex justify-between items-center text-xs">
+                    <span class="text-slate-500 font-mono">Start: {{ w.start_date or 'Today' }}</span>
+                    <a href="{{ url_for('trainer_workout_delete', id=w.id) }}" class="text-rose-400 hover:underline font-semibold" onclick="return confirm('Delete this workout routine?');">
+                        <i class="bi bi-trash"></i> Delete
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5 text-slate-400">
+            No workout suggestions created yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal: Add Workout Suggestion -->
+<div class="modal fade" id="addWorkoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-start">
+            <form action="{{ url_for('trainer_workouts') }}" method="POST">
+                <div class="modal-header border-slate-700">
+                    <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                        <i class="bi bi-activity text-emerald-400"></i> Add Workout Suggestion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body space-y-3 py-4">
+                    <div>
+                        <label class="form-label text-xs">Select Member <span class="text-rose-400">*</span></label>
+                        <select name="member_id" class="form-select" required>
+                            {% for m in members %}
+                            <option value="{{ m.id }}" {% if selected_member_id|string == m.id|string %}selected{% endif %}>{{ m.full_name }} ({{ m.member_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-xs">Workout Title <span class="text-rose-400">*</span></label>
+                            <input type="text" name="workout_name" class="form-control" placeholder="e.g. Upper Body Push" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-xs">Workout Type</label>
+                            <select name="workout_type" class="form-select">
+                                <option value="Strength & Conditioning">Strength & Conditioning</option>
+                                <option value="Cardio & HIIT">Cardio & HIIT</option>
+                                <option value="Yoga & Mobility">Yoga & Mobility</option>
+                                <option value="Fat Loss Circuit">Fat Loss Circuit</option>
+                                <option value="Hypertrophy">Hypertrophy</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label text-xs">Exercises List <span class="text-rose-400">*</span></label>
+                        <textarea name="exercises" rows="3" class="form-control" placeholder="e.g. Bench Press, Overhead Press, Incline Dumbbell Press, Tricep Dips" required></textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <label class="form-label text-xs">Sets</label>
+                            <input type="number" name="sets" value="4" class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-xs">Reps</label>
+                            <input type="number" name="reps" value="12" class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-xs">Duration</label>
+                            <input type="text" name="duration" value="60 mins" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-xs">Difficulty</label>
+                            <select name="difficulty" class="form-select">
+                                <option value="Beginner">Beginner</option>
+                                <option value="Intermediate" selected>Intermediate</option>
+                                <option value="Advanced">Advanced</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-xs">Start Date</label>
+                            <input type="date" name="start_date" value="{{ today_date }}" class="form-control">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label text-xs">Trainer Notes / Instructions</label>
+                        <input type="text" name="notes" class="form-control" placeholder="Focus on strict form and 90s rest between sets...">
+                    </div>
+                </div>
+                <div class="modal-footer border-slate-700">
+                    <button type="button" class="btn-gym-secondary text-xs" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-gym-primary text-xs">Assign Workout</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

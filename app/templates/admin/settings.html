@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings & UPI Configuration | SETFIT DARK RAGE{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="text-muted text-decoration-none small"><i class="fas fa-arrow-left me-1"></i> Admin Dashboard</a>
+            <h2 class="text-white fw-bold text-uppercase mb-0">Sanctuary <span class="text-rage">Configuration</span></h2>
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark-card border border-dark-rage p-4 p-md-5 rounded-4 shadow-lg">
+                <form action="{{ url_for('admin.settings') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <h5 class="text-white fw-bold text-uppercase mb-3"><i class="fas fa-building text-rage me-2"></i> Gym Identification & Branding</h5>
+                    <div class="mb-3">
+                        <label class="form-label text-light small text-uppercase fw-semibold">Facility Name</label>
+                        <input type="text" name="gym_name" class="form-control bg-black text-white border-secondary" value="{{ settings.gym_name if settings else 'SETFIT DARK RAGE' }}" required>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light small text-uppercase fw-semibold">Primary Contact Phone</label>
+                            <input type="tel" name="phone" class="form-control bg-black text-white border-secondary" value="{{ settings.phone if settings else '+91 98765 43210' }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light small text-uppercase fw-semibold">Official Email</label>
+                            <input type="email" name="email" class="form-control bg-black text-white border-secondary" value="{{ settings.email if settings else 'contact@setfitgym.com' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-light small text-uppercase fw-semibold">Facility Address</label>
+                        <textarea name="address" class="form-control bg-black text-white border-secondary" rows="2">{{ settings.address if settings else 'Near Pratibha Society, Karve Nagar, Pune, Maharashtra 411052' }}</textarea>
+                    </div>
+
+                    <hr class="border-secondary my-4">
+
+                    <h5 class="text-white fw-bold text-uppercase mb-3"><i class="fas fa-qrcode text-rage me-2"></i> UPI Gateway & Collection Details</h5>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-light small text-uppercase fw-semibold">UPI Virtual Payment Address (VPA)</label>
+                            <input type="text" name="upi_id" class="form-control bg-black text-white border-secondary" value="{{ settings.upi_id if settings else 'setfitdarkrage@upi' }}" placeholder="merchant@upi" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-light small text-uppercase fw-semibold">UPI Merchant Display Name</label>
+                            <input type="text" name="upi_name" class="form-control bg-black text-white border-secondary" value="{{ settings.upi_name if settings else 'SETFIT DARK RAGE PRIVATE LIMITED' }}" required>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-rage py-3 px-5 text-uppercase fw-bold shadow-sm">
+                            <i class="fas fa-save me-2"></i> Save Configuration
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Enquiry Details - {{ enquiry.full_name }}{% endblock %}
+{% block page_title %}Enquiry Details{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('enquiries_list') }}">Enquiries</a> / {{ enquiry.full_name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="space-y-5">
+            <!-- Action bar -->
+            <div class="d-flex flex-wrap items-center justify-between gap-3">
+                <a href="{{ url_for('enquiries_list') }}" class="btn-gym-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Enquiries
+                </a>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('enquiry_edit', id=enquiry.id) }}" class="btn-gym-primary">
+                        <i class="bi bi-pencil-square"></i> Edit Lead
+                    </a>
+                    <button type="button" class="btn-gym-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+
+            <!-- Lead Details Card -->
+            <div class="app-card">
+                <div class="app-card-header">
+                    <div class="d-flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-xl font-bold border border-cyan-500/30">
+                            {{ enquiry.full_name[:1].upper() }}
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold mb-0">{{ enquiry.full_name }}</h4>
+                            <span class="font-mono text-xs text-cyan-400">{{ enquiry.enquiry_code }} &bull; Received on {{ enquiry.enquiry_date }}</span>
+                        </div>
+                    </div>
+                    <div>
+                        {% if enquiry.status == 'New' %}
+                            <span class="status-badge status-new">New Lead</span>
+                        {% elif enquiry.status == 'Contacted' %}
+                            <span class="status-badge status-contacted">Contacted</span>
+                        {% elif enquiry.status == 'Converted' %}
+                            <span class="status-badge status-converted">Converted (Joined)</span>
+                        {% else %}
+                            <span class="status-badge status-closed">Closed</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="space-y-4 pt-2">
+                    <div class="row g-3 text-sm">
+                        <div class="col-12 col-md-6">
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+                                <span class="text-xs text-slate-400 font-semibold block mb-1">Phone Number</span>
+                                <span class="text-emerald-400 font-bold font-mono text-base">{{ enquiry.phone }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+                                <span class="text-xs text-slate-400 font-semibold block mb-1">Email Address</span>
+                                <span class="text-white font-medium">{{ enquiry.email or 'No email provided' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+                                <span class="text-xs text-slate-400 font-semibold block mb-1">Interested Plan</span>
+                                <span class="text-white font-bold">{{ enquiry.plan_name or 'General Gym Membership' }}</span>
+                                {% if enquiry.plan_price %}
+                                <span class="text-xs text-emerald-400 block mt-0.5">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(enquiry.plan_price) }} ({{ enquiry.duration_months }} Months)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/60">
+                                <span class="text-xs text-slate-400 font-semibold block mb-1">Lead Source</span>
+                                <span class="text-white font-medium">{{ enquiry.source or 'Walk-in' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
+                        <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider block mb-2">Message / Inquiry Details</span>
+                        <p class="text-slate-200 text-sm mb-0 whitespace-pre-line">{{ enquiry.message or 'No specific notes recorded for this enquiry.' }}</p>
+                    </div>
+
+                    <!-- Quick Status Change Bar -->
+                    <div class="pt-3 border-t border-slate-700 d-flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-xs text-slate-400 font-semibold">Update Lead Status:</span>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ url_for('enquiry_set_status', id=enquiry.id, status_val='contacted') }}" class="btn-gym-secondary text-xs">
+                                <i class="bi bi-telephone-outbound text-amber-400"></i> Mark Contacted
+                            </a>
+                            <a href="{{ url_for('enquiry_set_status', id=enquiry.id, status_val='converted') }}" class="btn-gym-primary text-xs">
+                                <i class="bi bi-person-check"></i> Mark Converted
+                            </a>
+                            <a href="{{ url_for('enquiry_set_status', id=enquiry.id, status_val='closed') }}" class="btn-gym-secondary text-xs">
+                                <i class="bi bi-x-circle text-slate-400"></i> Mark Closed
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-slate-700">
+                <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                    <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                    Confirm Lead Deletion
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-start py-4">
+                <p class="text-slate-300 mb-2">Are you sure you want to delete enquiry from <strong class="text-white">{{ enquiry.full_name }}</strong>?</p>
+            </div>
+            <div class="modal-footer border-slate-700">
+                <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('enquiry_delete', id=enquiry.id) }}" method="POST" style="display:inline;">
+                    <button type="submit" class="btn-gym-danger">Delete Enquiry</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

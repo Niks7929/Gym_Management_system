@@ -1,0 +1,165 @@
+{% extends "trainer/base.html" %}
+
+{% block title %}Diet Plans{% endblock %}
+{% block page_title %}Diet & Meal Suggestions{% endblock %}
+{% block breadcrumb %}Diet Plans{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h6 class="font-bold text-white mb-0">Macro Diet Plans & Nutrition</h6>
+            <span class="text-xs text-slate-400">Design macro-balanced meal schedules for assigned athletes</span>
+        </div>
+        <button type="button" class="btn-gym-primary" data-bs-toggle="modal" data-bs-target="#addDietModal">
+            <i class="bi bi-plus-circle-fill"></i> Add Meal Suggestion
+        </button>
+    </div>
+
+    <!-- Diet Cards Grid -->
+    <div class="row g-4">
+        {% for d in diet_plans %}
+        <div class="col-12 col-md-6 col-lg-4">
+            <div class="app-card h-100 border border-slate-800 space-y-3">
+                <div class="d-flex justify-between items-center">
+                    <span class="text-xs font-bold text-cyan-400 bg-cyan-500/10 px-2.5 py-1 rounded border border-cyan-500/20">
+                        {{ d.meal_name }}
+                    </span>
+                    <span class="text-xs font-mono text-amber-400"><i class="bi bi-clock"></i> {{ d.timing or 'Anytime' }}</span>
+                </div>
+
+                <div>
+                    <h5 class="text-white font-bold text-base mb-1">{{ d.food_items }}</h5>
+                    <span class="text-xs text-slate-400">Athlete: <strong class="text-white">{{ d.member_name }}</strong></span>
+                </div>
+
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 space-y-1.5 text-xs">
+                    <div class="d-flex justify-between">
+                        <span class="text-slate-400">Portion / Quantity:</span>
+                        <span class="text-white font-semibold">{{ d.quantity or '1 Portion' }}</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-1 text-center pt-2 border-t border-slate-800 font-mono">
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">KCAL</span>
+                            <strong class="text-amber-400">{{ d.calories }}</strong>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">PROTEIN</span>
+                            <strong class="text-emerald-400">{{ d.protein }}g</strong>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">CARBS</span>
+                            <strong class="text-cyan-400">{{ d.carbs }}g</strong>
+                        </div>
+                        <div>
+                            <span class="text-[9px] text-slate-400 block">FAT</span>
+                            <strong class="text-purple-400">{{ d.fat }}g</strong>
+                        </div>
+                    </div>
+                </div>
+
+                {% if d.notes %}
+                <p class="text-xs text-slate-400 mb-0 font-italic">
+                    <i class="bi bi-chat-left-text text-emerald-400"></i> "{{ d.notes }}"
+                </p>
+                {% endif %}
+
+                <div class="pt-2 border-t border-slate-800 text-end">
+                    <a href="{{ url_for('trainer_diet_delete', id=d.id) }}" class="text-rose-400 hover:underline text-xs font-semibold" onclick="return confirm('Delete this diet entry?');">
+                        <i class="bi bi-trash"></i> Delete Entry
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5 text-slate-400">
+            No diet plans created yet.
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal: Add Diet Plan -->
+<div class="modal fade" id="addDietModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-start">
+            <form action="{{ url_for('trainer_diet') }}" method="POST">
+                <div class="modal-header border-slate-700">
+                    <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                        <i class="bi bi-egg-fried text-purple-400"></i> Add Diet Suggestion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body space-y-3 py-4">
+                    <div>
+                        <label class="form-label text-xs">Select Member <span class="text-rose-400">*</span></label>
+                        <select name="member_id" class="form-select" required>
+                            {% for m in members %}
+                            <option value="{{ m.id }}" {% if selected_member_id|string == m.id|string %}selected{% endif %}>{{ m.full_name }} ({{ m.member_code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-xs">Meal Category <span class="text-rose-400">*</span></label>
+                            <select name="meal_name" class="form-select" required>
+                                <option value="Breakfast">Breakfast</option>
+                                <option value="Mid-Morning Snack">Mid-Morning Snack</option>
+                                <option value="Lunch">Lunch</option>
+                                <option value="Pre-Workout Snack">Pre-Workout Snack</option>
+                                <option value="Post-Workout Shake">Post-Workout Shake</option>
+                                <option value="Dinner">Dinner</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-xs">Timing</label>
+                            <input type="text" name="timing" value="08:00 AM" class="form-control" placeholder="e.g. 08:00 AM">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label text-xs">Food Items & Recipe <span class="text-rose-400">*</span></label>
+                        <textarea name="food_items" rows="2" class="form-control" placeholder="e.g. 4 Egg Whites, 1 Bowl Oats with Almonds & Honey" required></textarea>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label text-xs">Quantity / Portion</label>
+                            <input type="text" name="quantity" value="1 Bowl / 1 Plate" class="form-control">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label text-xs">Calories (Kcal)</label>
+                            <input type="number" name="calories" value="450" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-4">
+                            <label class="form-label text-xs">Protein (g)</label>
+                            <input type="number" name="protein" value="30" class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-xs">Carbs (g)</label>
+                            <input type="number" name="carbs" value="50" class="form-control">
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-xs">Fat (g)</label>
+                            <input type="number" name="fat" value="10" class="form-control">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="form-label text-xs">Dietary Notes</label>
+                        <input type="text" name="notes" class="form-control" placeholder="Drink 500ml water after meal...">
+                    </div>
+                </div>
+                <div class="modal-footer border-slate-700">
+                    <button type="button" class="btn-gym-secondary text-xs" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-gym-primary text-xs">Save Meal Plan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

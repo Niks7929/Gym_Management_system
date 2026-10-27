@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Trainers Directory{% endblock %}
+{% block page_title %}Trainers Management{% endblock %}
+{% block breadcrumb %}Trainers{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+
+    <!-- Top Action Row -->
+    <div class="d-flex flex-wrap items-center justify-between gap-3">
+        <div>
+            <h6 class="font-bold text-white mb-0">Certified Fitness Coaches & Instructors</h6>
+            <span class="text-xs text-slate-400">Manage gym trainers, specializations, and schedules</span>
+        </div>
+        <div>
+            <a href="{{ url_for('trainer_add') }}" class="btn-gym-primary">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Add Trainer</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Search & Filter Form -->
+    <div class="filter-bar">
+        <form method="GET" action="{{ url_for('trainers_list') }}" class="row g-3 items-end">
+            <div class="col-12 col-md-5">
+                <label class="form-label">Search Trainer</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-slate-900 border-slate-700 text-slate-400">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" name="q" value="{{ search_query }}" class="form-control" placeholder="Search by name, phone, email, or trainer ID...">
+                </div>
+            </div>
+
+            <div class="col-6 col-md-3">
+                <label class="form-label">Specialization</label>
+                <select name="specialization" class="form-select">
+                    <option value="">All Specializations</option>
+                    {% for s in specializations %}
+                    <option value="{{ s }}" {% if spec_filter == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-6 col-md-2">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    <option value="Active" {% if status_filter == 'Active' %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if status_filter == 'Inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+
+            <div class="col-12 col-md-2 d-flex gap-2">
+                <button type="submit" class="btn-gym-primary w-100 justify-center">
+                    <i class="bi bi-funnel-fill"></i> Filter
+                </button>
+                {% if search_query or spec_filter or status_filter %}
+                <a href="{{ url_for('trainers_list') }}" class="btn-gym-secondary" title="Reset Filters">
+                    <i class="bi bi-x-circle"></i>
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Trainers Table -->
+    <div class="app-table-wrapper">
+        <div class="table-responsive">
+            <table class="app-table">
+                <thead>
+                    <tr>
+                        <th>Trainer ID</th>
+                        <th>Coach Name</th>
+                        <th>Contact</th>
+                        <th>Specialization</th>
+                        <th>Experience</th>
+                        <th>Joining Date</th>
+                        <th>Status</th>
+                        <th class="text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in trainers %}
+                    <tr>
+                        <td>
+                            <span class="font-mono text-xs font-bold text-rose-400 bg-rose-500/10 px-2.5 py-1 rounded border border-rose-500/20">
+                                {{ t.trainer_code }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="font-bold text-white">{{ t.full_name }}</div>
+                            <span class="text-xs text-slate-400">{{ t.qualification or 'Certified Coach' }}</span>
+                        </td>
+                        <td>
+                            <div class="text-xs text-slate-200 font-semibold"><i class="bi bi-telephone text-emerald-400"></i> {{ t.phone }}</div>
+                            <div class="text-xs text-slate-400">{{ t.email or 'N/A' }}</div>
+                        </td>
+                        <td>
+                            <span class="px-2.5 py-1 rounded-md bg-blue-500/10 text-blue-400 text-xs font-semibold border border-blue-500/20">
+                                {{ t.specialization }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="text-white font-medium text-xs">{{ t.experience_years }} Years</span>
+                        </td>
+                        <td><span class="text-slate-400 text-xs">{{ t.joining_date }}</span></td>
+                        <td>
+                            {% if t.status == 'Active' %}
+                                <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Active</span>
+                            {% else %}
+                                <span class="status-badge status-inactive"><i class="bi bi-dash-circle-fill"></i> Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="d-inline-flex gap-1">
+                                <a href="{{ url_for('trainer_view', id=t.id) }}" class="table-action-btn" title="View Trainer Profile">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a href="{{ url_for('trainer_edit', id=t.id) }}" class="table-action-btn btn-edit" title="Edit Trainer">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <button type="button" class="table-action-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteTrainerModal{{ t.id }}" title="Delete Trainer">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+
+                            <!-- Delete Trainer Modal -->
+                            <div class="modal fade" id="deleteTrainerModal{{ t.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <div class="modal-header border-slate-700">
+                                            <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                                                <i class="bi bi-exclamation-octagon-fill text-rose-500"></i>
+                                                Confirm Trainer Deletion
+                                            </h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-start py-4">
+                                            <p class="text-slate-300 mb-2">Are you sure you want to delete coach <strong class="text-white">{{ t.full_name }}</strong> (<span class="text-rose-400">{{ t.trainer_code }}</span>)?</p>
+                                        </div>
+                                        <div class="modal-footer border-slate-700">
+                                            <button type="button" class="btn-gym-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <form action="{{ url_for('trainer_delete', id=t.id) }}" method="POST" style="display:inline;">
+                                                <button type="submit" class="btn-gym-danger">Delete Trainer</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center py-5 text-slate-400">
+                            No trainers found matching your filter criteria.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

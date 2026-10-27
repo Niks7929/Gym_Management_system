@@ -1,0 +1,60 @@
+{% extends "member/base.html" %}
+
+{% block title %}Membership Plan Details{% endblock %}
+{% block page_title %}Membership Plan Details{% endblock %}
+{% block breadcrumb %}<a href="{{ url_for('member_membership') }}">Membership</a> / Plan Specs{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="app-card border border-slate-700 space-y-6">
+            <div class="d-flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl">
+                    <i class="bi bi-box-seam-fill"></i>
+                </div>
+                <div>
+                    <h4 class="text-xl font-bold text-white mb-0">{{ plan.name if plan else 'Standard Gym Membership' }}</h4>
+                    <span class="text-xs text-slate-400">Duration: {{ plan.duration_months if plan else 1 }} Months</span>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h6 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Package Price</h6>
+                    <div class="text-3xl font-black text-emerald-400">
+                        {{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(plan.price) if plan else '1,500' }}
+                    </div>
+                </div>
+
+                <div>
+                    <h6 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Description</h6>
+                    <p class="text-xs text-slate-300 leading-relaxed mb-0">
+                        {{ plan.description if plan else 'Full facility access including cardio machines, free weight section, strength machines, and assigned coach workout plans.' }}
+                    </p>
+                </div>
+
+                <div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-2">
+                    <h6 class="font-bold text-white text-xs uppercase mb-2">Package Benefits</h6>
+                    <div class="row g-2 text-xs text-slate-300">
+                        <div class="col-12 col-md-6 d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Full Access to Gym Floor</div>
+                        <div class="col-12 col-md-6 d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Personal Trainer Consultations</div>
+                        <div class="col-12 col-md-6 d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Digital Workout & Diet Dashboard</div>
+                        <div class="col-12 col-md-6 d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Daily Check-in Logging</div>
+                        <div class="col-12 col-md-6 d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Body Composition Tracking</div>
+                        <div class="col-12 col-md-6 d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Steam Room & Locker Facilities</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-2 d-flex justify-between items-center border-t border-slate-800">
+                <a href="{{ url_for('member_membership') }}" class="btn-gym-secondary text-xs">
+                    <i class="bi bi-arrow-left"></i> Back to Membership
+                </a>
+                <a href="{{ url_for('member_payments') }}" class="btn-gym-primary text-xs">
+                    <i class="bi bi-credit-card"></i> View Payment History
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

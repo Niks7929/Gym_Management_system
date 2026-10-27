@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Contact & Location | SETFIT GYM Karve Nagar{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-darker border-bottom border-dark-rage">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="badge bg-rage text-white px-3 py-2 text-uppercase mb-2">Connect With SETFIT GYM</span>
+            <h1 class="display-4 text-main fw-bold text-uppercase">Contact <span class="text-rage">Karve Nagar, Pune</span></h1>
+            <p class="text-muted max-w-700 mx-auto">Get in touch with our team, schedule a trial session, or visit our Karve Nagar facility.</p>
+        </div>
+
+        <div class="row g-5">
+            <div class="col-lg-5">
+                <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 mb-4">
+                    <h5 class="text-main fw-bold text-uppercase mb-3"><i class="fas fa-map-marker-alt text-rage me-2"></i> Facility Address</h5>
+                    <p class="text-secondary mb-1">{{ gym_settings.address if gym_settings else 'Near Pratibha Society, Karve Nagar, Pune, Maharashtra 411052' }}</p>
+                    <p class="text-muted small">Valet parking & secure locker storage available on site.</p>
+                </div>
+
+                <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 mb-4">
+                    <h5 class="text-main fw-bold text-uppercase mb-3"><i class="fas fa-phone-alt text-rage me-2"></i> Phone & WhatsApp</h5>
+                    <p class="text-secondary mb-1 fw-bold fs-5">{{ gym_settings.phone if gym_settings else '+91 98765 43210' }}</p>
+                    <p class="text-muted small">Available daily from 05:00 AM – 11:00 PM IST.</p>
+                </div>
+
+                <div class="card bg-dark-card border border-dark-rage p-4 rounded-3">
+                    <h5 class="text-main fw-bold text-uppercase mb-3"><i class="fas fa-envelope text-rage me-2"></i> Official Email</h5>
+                    <p class="text-secondary mb-0">{{ gym_settings.email if gym_settings else 'contact@setfitgym.com' }}</p>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card bg-dark-card border border-dark-rage p-4 p-md-5 rounded-3 shadow-lg">
+                    <h4 class="text-main fw-bold text-uppercase mb-3">Send Us a Direct Message</h4>
+                    
+                    <form action="{{ url_for('public.submit_enquiry') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Your Full Name</label>
+                            <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-uppercase fw-semibold">Phone Number</label>
+                                <input type="tel" name="phone" class="form-control" placeholder="+91 98765 00000" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-uppercase fw-semibold">Email Address</label>
+                                <input type="email" name="email" class="form-control" placeholder="name@domain.com">
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small text-uppercase fw-semibold">Your Message or Training Query</label>
+                            <textarea name="message" class="form-control" rows="4" placeholder="How can we assist you with your fitness and lifting goals?" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-rage w-100 py-3 text-uppercase fw-bold">
+                            <i class="fas fa-paper-plane me-2"></i> Transmit Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

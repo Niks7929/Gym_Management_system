@@ -1,0 +1,104 @@
+{% extends "member/base.html" %}
+
+{% block title %}Membership Status{% endblock %}
+{% block page_title %}Membership & Subscription Details{% endblock %}
+{% block breadcrumb %}Membership{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        <div class="app-card border border-slate-700 space-y-6">
+            <div class="d-flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-4">
+                <div>
+                    <h5 class="text-xl font-bold text-white mb-0">{{ member.plan_name or 'Standard Gym Plan' }}</h5>
+                    <span class="text-xs text-slate-400">Membership ID: <strong class="text-emerald-400 font-mono">{{ member.member_code }}</strong></span>
+                </div>
+                <div>
+                    {% if member.status == 'Active' %}
+                        <span class="status-badge status-active text-sm px-3 py-1.5"><i class="bi bi-check-circle-fill"></i> Active</span>
+                    {% elif member.status == 'Expired' %}
+                        <span class="status-badge status-expired text-sm px-3 py-1.5"><i class="bi bi-exclamation-triangle-fill"></i> Expired</span>
+                    {% else %}
+                        <span class="status-badge status-inactive text-sm px-3 py-1.5">Inactive</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-6 col-md-3">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Start Date</span>
+                    <strong class="text-white text-sm font-mono">{{ member.start_date }}</strong>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Expiry Date</span>
+                    <strong class="text-amber-400 text-sm font-mono">{{ member.end_date }}</strong>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Duration</span>
+                    <strong class="text-white text-sm">{{ member.duration_months or 1 }} Month(s)</strong>
+                </div>
+
+                <div class="col-6 col-md-3">
+                    <span class="text-xs text-slate-400 block uppercase font-semibold">Days Remaining</span>
+                    <strong class="text-emerald-400 text-sm font-mono">{{ days_remaining }} Days</strong>
+                </div>
+            </div>
+
+            <div class="p-4 bg-slate-900 rounded-2xl border border-slate-800 space-y-2">
+                <h6 class="font-bold text-white text-sm mb-0">Plan Benefits & Access:</h6>
+                <ul class="space-y-1.5 text-xs text-slate-300">
+                    <li class="d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Full access to strength and cardio equipment</li>
+                    <li class="d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Assigned trainer workout and diet plans</li>
+                    <li class="d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Real-time gym check-in logging</li>
+                    <li class="d-flex items-center gap-2"><i class="bi bi-check2 text-emerald-400"></i> Locker room & steam bath privileges</li>
+                </ul>
+            </div>
+
+            <div class="pt-2 d-flex flex-wrap gap-3 justify-between items-center">
+                <a href="{{ url_for('member_plan') }}" class="btn-gym-secondary text-xs">
+                    <i class="bi bi-info-circle"></i> View Detailed Plan Specs
+                </a>
+
+                {% if member.status == 'Expired' or days_remaining <= 15 %}
+                <button type="button" class="btn-gym-primary text-xs px-4" data-bs-toggle="modal" data-bs-target="#renewRequestModal">
+                    <i class="bi bi-arrow-repeat"></i> Submit Renewal Request
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Renewal Request -->
+<div class="modal fade" id="renewRequestModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-start">
+            <form action="{{ url_for('member_renew_request') }}" method="POST">
+                <div class="modal-header border-slate-700">
+                    <h5 class="modal-title font-bold text-white d-flex items-center gap-2">
+                        <i class="bi bi-arrow-repeat text-emerald-400"></i> Membership Renewal Request
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body space-y-3 py-4">
+                    <p class="text-xs text-slate-300">Select your preferred renewal plan package. Front desk staff will confirm your renewal.</p>
+                    <div>
+                        <label class="form-label text-xs">Select Plan Package</label>
+                        <select name="plan_id" class="form-select">
+                            {% for p in plans %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(p.price) }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-slate-700">
+                    <button type="button" class="btn-gym-secondary text-xs" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-gym-primary text-xs">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}Executive Analytics & Command | SETFIT DARK RAGE{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <!-- Admin Subnav -->
+    <div class="card bg-dark-card border border-dark-rage mb-4 rounded-3">
+        <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-danger text-black fw-bold px-3 py-2 text-uppercase">
+                    <i class="fas fa-shield-alt me-1"></i> Admin Command
+                </span>
+                <h4 class="text-white fw-bold mb-0 text-uppercase d-none d-md-block">Executive Analytics</h4>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-rage btn-sm text-uppercase fw-semibold"><i class="fas fa-chart-line me-1"></i> Dashboard</a>
+                <a href="{{ url_for('admin.members') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-users me-1"></i> Members</a>
+                <a href="{{ url_for('admin.trainers') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-user-ninja me-1"></i> Trainers</a>
+                <a href="{{ url_for('admin.plans') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-tags me-1"></i> Plans (₹)</a>
+                <a href="{{ url_for('admin.payments') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold position-relative">
+                    <i class="fas fa-receipt me-1"></i> Payments
+                    {% if pending_payments_count > 0 %}
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        {{ pending_payments_count }}
+                    </span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('admin.enquiries') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-headset me-1"></i> Leads</a>
+                <a href="{{ url_for('admin.equipment') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-tools me-1"></i> Equipment</a>
+                <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-fingerprint me-1"></i> Audit Logs</a>
+                <a href="{{ url_for('admin.settings') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-cog me-1"></i> Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Metric Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small text-uppercase fw-bold">Total Active Members</span>
+                    <div class="bg-black p-2 rounded border border-dark-rage text-rage"><i class="fas fa-users fs-5"></i></div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">{{ total_active_members }}</h2>
+                <div class="text-muted small"><span class="text-success"><i class="fas fa-check"></i> Active</span> athletes registered</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small text-uppercase fw-bold">Prospect Leads</span>
+                    <div class="bg-black p-2 rounded border border-dark-rage text-info"><i class="fas fa-headset fs-5"></i></div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">{{ new_leads_count }}</h2>
+                <div class="text-muted small"><a href="{{ url_for('admin.enquiries') }}" class="text-info text-decoration-none"><i class="fas fa-arrow-right me-1"></i> View Pipeline &rarr;</a></div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small text-uppercase fw-bold">Verified Revenue (Total)</span>
+                    <div class="bg-black p-2 rounded border border-dark-rage text-rage"><i class="fas fa-rupee-sign fs-5"></i></div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">₹{{ "{:,.0f}".format(total_revenue) }}</h2>
+                <div class="text-muted small"><span class="text-success"><i class="fas fa-arrow-up"></i> Collected</span> & cleared funds</div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="text-muted small text-uppercase fw-bold">Pending UPI Approvals</span>
+                    <div class="bg-black p-2 rounded border border-dark-rage text-warning"><i class="fas fa-hourglass-half fs-5"></i></div>
+                </div>
+                <h2 class="text-white fw-bold mb-1">{{ pending_payments_count }}</h2>
+                <div class="text-muted small"><a href="{{ url_for('admin.payments') }}" class="text-warning text-decoration-none">Review queue &rarr;</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts & Activity Log -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="text-white fw-bold text-uppercase mb-0"><i class="fas fa-chart-area text-rage me-2"></i> Monthly Revenue Flow (₹)</h5>
+                    <span class="badge bg-black border border-secondary text-muted">Real-Time Aggregation</span>
+                </div>
+                <div style="height: 300px;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="text-white fw-bold text-uppercase mb-0"><i class="fas fa-history text-rage me-2"></i> Recent Security Audits</h5>
+                    <a href="{{ url_for('admin.audit_logs') }}" class="text-muted small hover-rage">View All</a>
+                </div>
+
+                <div class="d-flex flex-column gap-3 overflow-auto" style="max-height: 300px;">
+                    {% if recent_audits %}
+                        {% for audit in recent_audits %}
+                        <div class="p-2 border-bottom border-dark">
+                            <div class="d-flex justify-content-between small">
+                                <span class="text-rage fw-semibold">{{ audit.action }}</span>
+                                <span class="text-muted">{{ audit.created_at.strftime('%H:%M:%S') }}</span>
+                            </div>
+                            <div class="text-light small text-truncate">{{ audit.details }}</div>
+                            <div class="text-muted extra-small">IP: {{ audit.ip_address }}</div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-muted small text-center py-4">No recent security events logged.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        const months = {{ chart_months|tojson }};
+        const revenues = {{ chart_revenues|tojson }};
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [{
+                    label: 'Revenue (₹)',
+                    data: revenues,
+                    borderColor: '#ff1e27',
+                    backgroundColor: 'rgba(255, 30, 39, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#ff1e27',
+                    pointBorderColor: '#ffffff',
+                    pointHoverRadius: 6,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { color: '#222' },
+                        ticks: { color: '#888' }
+                    },
+                    y: {
+                        grid: { color: '#222' },
+                        ticks: { 
+                            color: '#888',
+                            callback: function(value) { return '₹' + value.toLocaleString('en-IN'); }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) { return '₹' + context.raw.toLocaleString('en-IN'); }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "member/base.html" %}
+
+{% block title %}My Assigned Trainer{% endblock %}
+{% block page_title %}Assigned Coach Profile{% endblock %}
+{% block breadcrumb %}Trainer{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+        {% if trainer %}
+        <div class="app-card border border-slate-700 space-y-6">
+            <div class="d-flex flex-wrap items-center gap-4 border-b border-slate-800 pb-5">
+                <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white text-4xl font-black shadow-xl">
+                    {{ trainer.full_name[0] }}
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-2xl font-black text-white mb-0">{{ trainer.full_name }}</h3>
+                    <span class="text-xs font-semibold text-emerald-400 block">{{ trainer.specialization or 'Personal Fitness Coach' }}</span>
+                    <span class="text-xs text-slate-400 font-mono"><i class="bi bi-patch-check-fill text-cyan-400"></i> {{ trainer.qualification or 'ISSA Certified Coach' }}</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block mb-1">Experience</span>
+                    <strong class="text-white text-sm font-mono">{{ trainer.experience_years or 5 }} Years</strong>
+                </div>
+
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                    <span class="text-slate-400 block mb-1">Coach Code</span>
+                    <strong class="text-amber-400 text-sm font-mono">{{ trainer.trainer_code }}</strong>
+                </div>
+
+                <div class="p-3 bg-slate-900 rounded-xl border border-slate-800 col-span-2 sm:col-span-1">
+                    <span class="text-slate-400 block mb-1">Phone Contact</span>
+                    <strong class="text-emerald-400 text-sm font-mono">{{ trainer.phone }}</strong>
+                </div>
+            </div>
+
+            {% if trainer.bio %}
+            <div class="space-y-2">
+                <h6 class="text-xs font-bold uppercase tracking-wider text-slate-400">Coach Bio & Specialization</h6>
+                <p class="text-xs text-slate-300 leading-relaxed bg-slate-900 p-4 rounded-2xl border border-slate-800 mb-0">
+                    {{ trainer.bio }}
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="pt-2 d-flex justify-between items-center border-t border-slate-800">
+                <a href="{{ url_for('member_workouts') }}" class="btn-gym-secondary text-xs">
+                    <i class="bi bi-activity"></i> View Workout Routines
+                </a>
+                <a href="{{ url_for('member_messages') }}" class="btn-gym-primary text-xs px-4">
+                    <i class="bi bi-chat-left-text-fill"></i> Message Coach Directly
+                </a>
+            </div>
+        </div>
+        {% else %}
+        <div class="app-card text-center py-8 text-slate-400">
+            <i class="bi bi-person-badge text-4xl text-slate-500 mb-2 block"></i>
+            <h5>No Personal Trainer Currently Assigned</h5>
+            <p class="text-xs text-slate-400 max-w-md mx-auto">Please contact the front desk or gym administrator to get assigned a certified personal coach.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

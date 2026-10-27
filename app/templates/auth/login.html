@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In | SETFIT GYM{% endblock %}
+
+{% block content %}
+<section class="min-vh-100 d-flex align-items-center py-5 bg-darker">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-8 col-sm-11">
+                <div class="card bg-dark-card border border-dark-rage p-4 p-md-5 rounded-4 shadow-lg">
+                    <!-- Brand Header -->
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle bg-black border border-rage p-3" style="width: 70px; height: 70px;">
+                                <i class="fas fa-dumbbell text-rage fs-2"></i>
+                            </span>
+                        </div>
+                        <h2 class="text-main fw-bold text-uppercase mb-1">
+                            SETFIT <span class="text-rage">GYM</span>
+                        </h2>
+                        <p class="text-secondary fw-semibold text-uppercase small letter-spacing-1 mb-2">Sign In to Your Account</p>
+                        <p class="text-muted small mb-0">Enter your email and password to access your dashboard.</p>
+                    </div>
+
+                    <!-- Single Unified Login Form -->
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Email Input -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Email Address</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input type="email" name="email" class="form-control py-2" placeholder="name@domain.com" value="{{ request.args.get('email', form.email.data or '') }}" required autofocus>
+                            </div>
+                        </div>
+
+                        <!-- Password Input -->
+                        <div class="mb-3">
+                            <label class="form-label small text-uppercase fw-semibold">Password</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="password" class="form-control py-2" placeholder="••••••••" required>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me -->
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input type="checkbox" name="remember" class="form-check-input" id="rememberMe" checked>
+                                <label class="form-check-label text-muted small" for="rememberMe">Keep me signed in</label>
+                            </div>
+                        </div>
+
+                        <!-- Sign In Button -->
+                        <button type="submit" class="btn btn-rage w-100 py-3 text-uppercase fw-bold shadow-sm fs-6">
+                            <i class="fas fa-sign-in-alt me-2"></i> Sign In
+                        </button>
+                    </form>
+
+                    <!-- Registration Option Below Form -->
+                    <div class="mt-4 pt-4 border-top border-dark-rage text-center">
+                        <p class="text-secondary small mb-3">
+                            Don't have an account?
+                        </p>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light w-100 py-2 text-uppercase fw-bold small mb-3">
+                            <i class="fas fa-user-plus me-2"></i> Register / Join SETFIT GYM
+                        </a>
+                        
+                        <div>
+                            <a href="{{ url_for('public.index') }}" class="text-secondary hover-rage text-decoration-none small">
+                                <i class="fas fa-arrow-left me-1"></i> Return to Home Page
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

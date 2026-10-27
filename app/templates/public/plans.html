@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Membership Plans & Pricing | SETFIT GYM{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-darker border-bottom border-dark-rage min-vh-100">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <span class="badge bg-rage text-white px-3 py-2 text-uppercase mb-2 fw-bold">Direct Pricing</span>
+            <h1 class="display-4 text-main fw-bold text-uppercase">Membership <span class="border-bottom border-dark-rage pb-1">Plans (₹)</span></h1>
+            <p class="text-muted max-w-700 mx-auto">Zero hidden fees, zero maintenance charges. All plans include digital biometric entry pass and complete gym floor access.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            {% for plan in plans %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 bg-dark-card border {{ 'border-rage shadow-rage' if plan.name == 'Premium Annual VIP' else 'border-dark-rage' }} rounded-3 overflow-hidden position-relative plan-card">
+                    {% if plan.name == 'Premium Annual VIP' %}
+                    <div class="position-absolute top-0 end-0 bg-rage text-white text-uppercase fw-bold px-3 py-1 small rounded-bottom-start">
+                        VIP Tier
+                    </div>
+                    {% endif %}
+
+                    <div class="card-body p-4 d-flex flex-column">
+                        <div class="mb-3">
+                            <span class="badge bg-dark-card border border-dark-rage text-main text-uppercase">{{ plan.duration_months }} {% if plan.duration_months == 1 %}Month{% else %}Months{% endif %}</span>
+                            <h4 class="text-main fw-bold text-uppercase mt-2 mb-0">{{ plan.name }}</h4>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <span class="display-6 fw-bold text-main">₹{{ "{:,.0f}".format(plan.price) }}</span>
+                            <span class="text-muted small">/ {{ plan.duration_months }} {% if plan.duration_months == 1 %}Month{% else %}Months{% endif %}</span>
+                        </div>
+                        
+                        <p class="text-muted small mb-4">{{ plan.description }}</p>
+                        
+                        <ul class="list-unstyled d-flex flex-column gap-2 mb-4 small text-secondary flex-grow-1">
+                            {% if plan.features_list %}
+                                {% for feat in plan.features_list %}
+                                <li class="d-flex align-items-center">
+                                    <i class="fas fa-check text-rage me-2"></i> {{ feat }}
+                                </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Unlimited Gym Access</li>
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Fitness Assessment</li>
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Trainer Support</li>
+                                <li class="d-flex align-items-center"><i class="fas fa-check text-rage me-2"></i> Digital Workout Dashboard</li>
+                            {% endif %}
+                        </ul>
+                        
+                        <a href="{{ url_for('auth.register', plan_id=plan.id) }}" class="btn {{ 'btn-rage' if plan.name == 'Premium Annual VIP' else 'btn-rage-outline' }} w-100 py-2 text-uppercase fw-bold">
+                            Join Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

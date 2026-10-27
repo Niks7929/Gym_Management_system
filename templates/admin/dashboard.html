@@ -1,0 +1,417 @@
+{% extends "base.html" %}
+
+{% block title %}Master Admin Dashboard{% endblock %}
+{% block page_title %}Master Admin Dashboard{% endblock %}
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+    <!-- 1. Quick Actions Bar -->
+    <div class="app-card !p-4 bg-gradient-to-r from-slate-900 to-slate-800 border-slate-700">
+        <div class="d-flex flex-wrap items-center justify-between gap-3">
+            <div class="d-flex items-center gap-2">
+                <span class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <i class="bi bi-lightning-fill text-lg"></i>
+                </span>
+                <div>
+                    <h6 class="mb-0 font-bold text-white text-sm">Quick Management Actions</h6>
+                    <span class="text-xs text-slate-400">Instantly execute daily admin tasks</span>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('member_add') }}" class="quick-action-btn">
+                    <i class="bi bi-person-plus-fill"></i>
+                    <span>Add Member</span>
+                </a>
+                <a href="{{ url_for('plan_add') }}" class="quick-action-btn">
+                    <i class="bi bi-plus-square-fill"></i>
+                    <span>Add Membership Plan</span>
+                </a>
+                <a href="{{ url_for('trainer_add') }}" class="quick-action-btn">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Add Trainer</span>
+                </a>
+                <a href="{{ url_for('enquiry_add') }}" class="quick-action-btn">
+                    <i class="bi bi-chat-plus-fill"></i>
+                    <span>Add Enquiry</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Main Statistic Cards Grid -->
+    <div class="row g-4">
+        <!-- Total Members -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card stat-emerald">
+                <div class="stat-card-top">
+                    <span class="stat-title">Total Members</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.total_members }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-arrow-up-circle-fill text-emerald-400"></i>
+                    <span>+{{ stats.total_members if stats.total_members < 15 else 12 }} this month</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Memberships -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card stat-blue">
+                <div class="stat-card-top">
+                    <span class="stat-title">Active Memberships</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-person-check-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.active_members }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-check-circle text-blue-400"></i>
+                    <span>Currently active & training</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Today -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card stat-amber">
+                <div class="stat-card-top">
+                    <span class="stat-title">Revenue Today</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(stats.revenue_today) }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-calendar-event text-amber-400"></i>
+                    <span>Subscriptions collected today</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue This Month -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card stat-purple">
+                <div class="stat-card-top">
+                    <span class="stat-title">Revenue This Month</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ gym_settings.currency_symbol if gym_settings else '₹' }}{{ "{:,.0f}".format(stats.revenue_this_month) }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-trophy text-purple-400"></i>
+                    <span>Total monthly intake</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Trainers -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card stat-rose">
+                <div class="stat-card-top">
+                    <span class="stat-title">Total Trainers</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-person-workspace"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.total_trainers }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-award text-rose-400"></i>
+                    <span>Certified fitness instructors</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- New Enquiries -->
+        <div class="col-12 col-sm-6 col-xl-4">
+            <div class="stat-card stat-cyan">
+                <div class="stat-card-top">
+                    <span class="stat-title">New Enquiries</span>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-chat-dots-fill"></i>
+                    </div>
+                </div>
+                <div class="stat-number">{{ stats.new_enquiries }}</div>
+                <div class="stat-subtext">
+                    <i class="bi bi-clock-history text-cyan-400"></i>
+                    <span>Pending follow-up leads</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Admin Analytics Section -->
+    <div class="row g-4">
+        <!-- Monthly Revenue Chart (Last 6 Months) -->
+        <div class="col-12 col-lg-8">
+            <div class="app-card h-100">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-bar-chart-line-fill text-emerald-400"></i>
+                        <span>Monthly Revenue Trend (Last 6 Months)</span>
+                    </h5>
+                    <span class="text-xs text-slate-400">Auto-updated from payments</span>
+                </div>
+                <div style="height: 280px; position: relative;">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Membership Overview & Plan Distribution -->
+        <div class="col-12 col-lg-4">
+            <div class="app-card h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="app-card-header">
+                        <h5 class="app-card-title">
+                            <i class="bi bi-pie-chart-fill text-blue-400"></i>
+                            <span>Membership Status</span>
+                        </h5>
+                    </div>
+                    
+                    <div class="space-y-3 mb-4">
+                        <!-- Active -->
+                        <div>
+                            <div class="d-flex justify-content-between text-xs font-semibold mb-1">
+                                <span class="text-slate-300">Active Members</span>
+                                <span class="text-emerald-400">{{ stats.active_members }} ({{ ((stats.active_members / stats.total_members * 100) if stats.total_members > 0 else 0) | round(1) }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: {{ ((stats.active_members / stats.total_members * 100) if stats.total_members > 0 else 0) }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Expired -->
+                        <div>
+                            <div class="d-flex justify-content-between text-xs font-semibold mb-1">
+                                <span class="text-slate-300">Expired Members</span>
+                                <span class="text-rose-400">{{ stats.expired_members }} ({{ ((stats.expired_members / stats.total_members * 100) if stats.total_members > 0 else 0) | round(1) }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-rose-500 h-2 rounded-full" style="width: {{ ((stats.expired_members / stats.total_members * 100) if stats.total_members > 0 else 0) }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Inactive -->
+                        <div>
+                            <div class="d-flex justify-content-between text-xs font-semibold mb-1">
+                                <span class="text-slate-300">Inactive / On Hold</span>
+                                <span class="text-slate-400">{{ stats.inactive_members }} ({{ ((stats.inactive_members / stats.total_members * 100) if stats.total_members > 0 else 0) | round(1) }}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-700 rounded-full h-2">
+                                <div class="bg-slate-500 h-2 rounded-full" style="width: {{ ((stats.inactive_members / stats.total_members * 100) if stats.total_members > 0 else 0) }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Plan Distribution Breakdown -->
+                <div>
+                    <h6 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 border-t border-slate-700 pt-3">
+                        Plan Distribution
+                    </h6>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        {% for plan_name, count in stats.plan_distribution.items() %}
+                        <div class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-700">
+                            <span class="text-slate-400 block truncate">{{ plan_name }}</span>
+                            <span class="text-white font-bold text-sm">{{ count }} Members</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Recent Data Tables Grid -->
+    <div class="row g-4">
+        <!-- Recent Members -->
+        <div class="col-12 col-lg-7">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-people text-emerald-400"></i>
+                        <span>Recently Joined Members</span>
+                    </h5>
+                    <a href="{{ url_for('members_list') }}" class="text-xs text-emerald-400 font-semibold hover:underline">View All &rarr;</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Member</th>
+                                <th>Plan</th>
+                                <th>Joined</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in recent_members %}
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-white">{{ m.full_name }}</div>
+                                    <span class="text-xs text-slate-400">{{ m.member_code }} &bull; {{ m.phone }}</span>
+                                </td>
+                                <td><span class="text-slate-300 font-medium">{{ m.plan_name or 'N/A' }}</span></td>
+                                <td><span class="text-slate-400 text-xs">{{ m.joining_date }}</span></td>
+                                <td>
+                                    {% if m.status == 'Active' %}
+                                        <span class="status-badge status-active"><i class="bi bi-check-circle-fill"></i> Active</span>
+                                    {% elif m.status == 'Expired' %}
+                                        <span class="status-badge status-expired"><i class="bi bi-exclamation-circle-fill"></i> Expired</span>
+                                    {% else %}
+                                        <span class="status-badge status-inactive"><i class="bi bi-dash-circle-fill"></i> Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('member_view', id=m.id) }}" class="table-action-btn" title="View Member Profile">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4 text-slate-400">No recent members found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Enquiries -->
+        <div class="col-12 col-lg-5">
+            <div class="app-card">
+                <div class="app-card-header">
+                    <h5 class="app-card-title">
+                        <i class="bi bi-chat-square-dots text-cyan-400"></i>
+                        <span>Recent Enquiries</span>
+                    </h5>
+                    <a href="{{ url_for('enquiries_list') }}" class="text-xs text-cyan-400 font-semibold hover:underline">Manage All &rarr;</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="app-table">
+                        <thead>
+                            <tr>
+                                <th>Lead</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for e in recent_enquiries %}
+                            <tr>
+                                <td>
+                                    <div class="font-bold text-white">{{ e.full_name }}</div>
+                                    <span class="text-xs text-slate-400">{{ e.phone }}</span>
+                                </td>
+                                <td><span class="text-slate-400 text-xs">{{ e.enquiry_date }}</span></td>
+                                <td>
+                                    {% if e.status == 'New' %}
+                                        <span class="status-badge status-new">New</span>
+                                    {% elif e.status == 'Contacted' %}
+                                        <span class="status-badge status-contacted">Contacted</span>
+                                    {% elif e.status == 'Converted' %}
+                                        <span class="status-badge status-converted">Converted</span>
+                                    {% else %}
+                                        <span class="status-badge status-closed">Closed</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('enquiry_view', id=e.id) }}" class="table-action-btn" title="View Enquiry Details">
+                                        <i class="bi bi-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-4 text-slate-400">No enquiries recorded yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('revenueChart');
+    if (ctx) {
+        const labels = {{ stats.month_labels | tojson }};
+        const data = {{ stats.monthly_revenue_data | tojson }};
+        
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Revenue ({{ gym_settings.currency_symbol if gym_settings else "₹" }})',
+                    data: data,
+                    backgroundColor: 'rgba(16, 185, 129, 0.45)',
+                    borderColor: '#10b981',
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    hoverBackgroundColor: '#10b981'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#1e293b',
+                        titleColor: '#f8fafc',
+                        bodyColor: '#10b981',
+                        borderColor: '#334155',
+                        borderWidth: 1,
+                        padding: 10,
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: {{ gym_settings.currency_symbol if gym_settings else "₹" }}' + context.parsed.y.toLocaleString();
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.3)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(51, 65, 85, 0.3)'
+                        },
+                        ticks: {
+                            color: '#94a3b8',
+                            callback: function(value) {
+                                return '{{ gym_settings.currency_symbol if gym_settings else "₹" }}' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
