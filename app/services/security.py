@@ -32,6 +32,8 @@ def role_required(allowed_roles):
                 # Redirect to their own dashboard
                 if current_user.role == 'admin':
                     return redirect(url_for('admin.dashboard'))
+                elif current_user.role == 'receptionist':
+                    return redirect(url_for('receptionist.dashboard'))
                 elif current_user.role == 'trainer':
                     return redirect(url_for('trainer.dashboard'))
                 else:

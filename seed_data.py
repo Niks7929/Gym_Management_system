@@ -7,7 +7,7 @@ import os
 from datetime import datetime, timedelta, date
 from app import create_app
 from app.extensions import db
-from app.models.user import Role, User, MemberProfile, TrainerProfile
+from app.models.user import Role, User, MemberProfile, TrainerProfile, ReceptionistProfile
 from app.models.membership import MembershipPlan, Membership, Payment, Enquiry
 from app.models.training import Exercise, WorkoutPlan, WorkoutExercise, DietPlan, DietMeal, TrainerMemberAssignment
 from app.models.operations import GymSetting, Equipment
@@ -21,11 +21,12 @@ def seed_database():
         db.create_all()
 
         # 1. Seed Roles
-        print("[*] Seeding Roles (admin, trainer, member)...")
+        print("[*] Seeding Roles (admin, trainer, member, receptionist)...")
         roles = {
             'admin': 'Full administrative control and executive analytics',
             'trainer': 'Assigned athlete coaching, workout split and diet programming',
-            'member': 'Gym athlete with digital biometric QR pass, workout and diet access'
+            'member': 'Gym athlete with digital biometric QR pass, workout and diet access',
+            'receptionist': 'Front desk biometric check-ins, member onboarding, renewals and POS payments'
         }
         role_objs = {}
         for role_name, desc in roles.items():
@@ -177,6 +178,42 @@ def seed_database():
             admin.set_password("Admin@SetFit2026!")
             db.session.add(admin)
             db.session.flush()
+
+        # 4b. Seed Single Official Front Desk / Receptionist
+        print("[*] Seeding Single Official Receptionist Account...")
+        receptionist_email = "receptionist@setfitgym.com"
+        receptionist = User.query.filter_by(email=receptionist_email).first()
+        if not receptionist:
+            receptionist = User(
+                email=receptionist_email,
+                first_name="Front",
+                last_name="Desk",
+                phone="+91 99999 77777",
+                role_id=role_objs['receptionist'].id,
+                role='receptionist',
+                is_active=True
+            )
+            receptionist.set_password("Desk@2026!")
+            db.session.add(receptionist)
+            db.session.flush()
+            rec_profile = ReceptionistProfile(
+                user_id=receptionist.id,
+                shift="Morning / General Shift",
+                desk_number="Front Desk #1"
+            )
+            db.session.add(rec_profile)
+        else:
+            receptionist.set_password("Desk@2026!")
+            receptionist.is_active = True
+            receptionist.role = 'receptionist'
+            receptionist.role_id = role_objs['receptionist'].id
+            if not receptionist.receptionist_profile:
+                rec_profile = ReceptionistProfile(
+                    user_id=receptionist.id,
+                    shift="Morning / General Shift",
+                    desk_number="Front Desk #1"
+                )
+                db.session.add(rec_profile)
 
         # 5. Seed Equipment Inventory
         print("[*] Seeding Equipment Inventory...")

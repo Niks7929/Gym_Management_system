@@ -13,9 +13,9 @@
 
         <div class="row g-4 justify-content-center">
             <!-- Member Portal Card -->
-            <div class="col-lg-5 col-md-6">
+            <div class="col-lg-4 col-md-6">
                 <div class="card bg-dark-card border border-dark-rage h-100 rounded-4 overflow-hidden portal-card transition-hover">
-                    <div class="card-body p-4 p-lg-5 text-center d-flex flex-column">
+                    <div class="card-body p-4 text-center d-flex flex-column">
                         <div class="portal-icon-wrapper mx-auto mb-4 bg-black rounded-circle d-flex align-items-center justify-content-center border border-rage" style="width: 80px; height: 80px;">
                             <i class="fas fa-id-card text-rage fs-2"></i>
                         </div>
@@ -34,10 +34,29 @@
                 </div>
             </div>
 
-            <!-- Trainer Portal Card -->
-            <div class="col-lg-5 col-md-6">
+            <!-- Front Desk / Receptionist Portal Card -->
+            <div class="col-lg-4 col-md-6">
                 <div class="card bg-dark-card border border-dark-rage h-100 rounded-4 overflow-hidden portal-card transition-hover">
-                    <div class="card-body p-4 p-lg-5 text-center d-flex flex-column">
+                    <div class="card-body p-4 text-center d-flex flex-column">
+                        <div class="portal-icon-wrapper mx-auto mb-4 bg-black rounded-circle d-flex align-items-center justify-content-center border border-primary" style="width: 80px; height: 80px;">
+                            <i class="fas fa-concierge-bell text-primary fs-2"></i>
+                        </div>
+                        <h3 class="text-main fw-bold text-uppercase mb-2">Front Desk</h3>
+                        <p class="text-muted small mb-4 flex-grow-1">Single front desk terminal for 24/7 biometric QR check-ins, member onboarding, renewals, and POS payments.</p>
+                        
+                        <div class="d-flex flex-column gap-2 mt-auto">
+                            <a href="{{ url_for('auth.login', role='receptionist') }}" class="btn btn-primary w-100 py-3 text-uppercase fw-bold">
+                                Front Desk Login
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trainer Portal Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card bg-dark-card border border-dark-rage h-100 rounded-4 overflow-hidden portal-card transition-hover">
+                    <div class="card-body p-4 text-center d-flex flex-column">
                         <div class="portal-icon-wrapper mx-auto mb-4 bg-black rounded-circle d-flex align-items-center justify-content-center border border-secondary" style="width: 80px; height: 80px;">
                             <i class="fas fa-user-ninja text-rage fs-2"></i>
                         </div>

@@ -18,18 +18,22 @@ def portal():
             return redirect(url_for('admin.dashboard'))
         elif current_user.role == 'trainer':
             return redirect(url_for('trainer.dashboard'))
+        elif current_user.role == 'receptionist':
+            return redirect(url_for('receptionist.dashboard'))
         else:
             return redirect(url_for('member.dashboard'))
     return redirect(url_for('auth.login'))
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Single unified authentication for Member, Trainer, and Admin."""
+    """Single unified authentication for Member, Trainer, Receptionist, and Admin."""
     if current_user.is_authenticated:
         if current_user.role == 'admin':
             return redirect(url_for('admin.dashboard'))
         elif current_user.role == 'trainer':
             return redirect(url_for('trainer.dashboard'))
+        elif current_user.role == 'receptionist':
+            return redirect(url_for('receptionist.dashboard'))
         else:
             return redirect(url_for('member.dashboard'))
 
@@ -90,6 +94,8 @@ def login():
             return redirect(url_for('admin.dashboard'))
         elif user.role == 'trainer':
             return redirect(url_for('trainer.dashboard'))
+        elif user.role == 'receptionist':
+            return redirect(url_for('receptionist.dashboard'))
         else:
             return redirect(url_for('member.dashboard'))
 
@@ -167,8 +173,15 @@ def register():
 
     if request.method == 'POST':
         selected_role = request.form.get('role', 'member').strip().lower()
-        if selected_role not in ['member', 'trainer']:
+        if selected_role not in ['member', 'trainer', 'receptionist']:
             selected_role = 'member'
+
+        # Enforce strict single-receptionist rule
+        if selected_role == 'receptionist':
+            existing_rec = User.query.filter_by(role='receptionist').first()
+            if existing_rec:
+                flash(f"Only 1 official Front Desk / Receptionist account is allowed in the system. The dedicated terminal account ({existing_rec.email}) is already active. Please sign in directly.", 'info')
+                return redirect(url_for('auth.login', email=existing_rec.email, role='receptionist'))
             
         full_name = request.form.get('full_name', '').strip() or f"{request.form.get('first_name', '')} {request.form.get('last_name', '')}".strip()
         email = request.form.get('email', '').strip().lower()
@@ -209,28 +222,55 @@ def register():
         # Create role-specific profile
         if selected_role == 'trainer':
             from app.models.user import TrainerProfile
+            specialization = request.form.get('specialization', 'Strength & Conditioning').strip()
+            experience_years = request.form.get('experience_years', type=int) or 2
+            certifications = request.form.get('certifications', '').strip()
+            bio = request.form.get('bio', f'Certified {specialization} Coach dedicated to athlete progression.').strip()
+
             profile = TrainerProfile(
                 user_id=new_user.id,
-                specialization='Fitness & Strength Coach',
-                experience_years=2,
-                bio='Dedicated fitness coach engineered to help athletes reach peak performance.'
+                specialization=specialization,
+                experience_years=experience_years,
+                certifications=certifications,
+                bio=bio
             )
             db.session.add(profile)
             db.session.commit()
             log_audit_event('TRAINER_REGISTERED', f"New coach registered: {email}", new_user)
             login_user(new_user)
-            flash('Welcome to SETFIT GYM! Your coach portal account has been established.', 'success')
+            flash('Welcome Coach! Your training terminal is now active.', 'success')
             return redirect(url_for('trainer.dashboard'))
 
+        elif selected_role == 'receptionist':
+            from app.models.user import ReceptionistProfile
+            shift = request.form.get('shift', 'Morning / General Shift').strip()
+            desk_number = request.form.get('desk_number', 'Front Desk Counter #1').strip()
+
+            profile = ReceptionistProfile(
+                user_id=new_user.id,
+                shift=shift,
+                desk_number=desk_number
+            )
+            db.session.add(profile)
+            db.session.commit()
+            log_audit_event('RECEPTIONIST_REGISTERED', f"Front Desk registered: {email}", new_user)
+            login_user(new_user)
+            flash('Welcome to Front Desk! Your receptionist terminal account is ready.', 'success')
+            return redirect(url_for('receptionist.dashboard'))
+
         else: # member
+            fitness_goal = request.form.get('fitness_goal', 'Strength & Conditioning').strip()
+            emergency_contact = request.form.get('emergency_contact', '').strip()
+
             profile = MemberProfile(
                 user_id=new_user.id,
-                fitness_goal='Strength & Conditioning'
+                fitness_goal=fitness_goal,
+                emergency_contact=emergency_contact
             )
             db.session.add(profile)
             db.session.flush()
 
-            # Create Initial Membership
+            # Create Initial Membership (Plan ONLY for Member)
             selected_plan = MembershipPlan.query.get(plan_id) if plan_id else (plans[0] if plans else None)
             plan_days = selected_plan.duration_days if selected_plan else 30
             membership = Membership(

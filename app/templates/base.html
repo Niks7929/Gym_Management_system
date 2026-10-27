@@ -128,6 +128,10 @@
                             <a href="{{ url_for('trainer.dashboard') }}" class="btn btn-rage-outline btn-sm text-uppercase fw-bold">
                                 <i class="fas fa-user-ninja me-1"></i> Trainer Portal
                             </a>
+                        {% elif current_user.role == 'receptionist' %}
+                            <a href="{{ url_for('receptionist.dashboard') }}" class="btn btn-rage-outline btn-sm text-uppercase fw-bold">
+                                <i class="fas fa-concierge-bell me-1"></i> Front Desk
+                            </a>
                         {% else %}
                             <a href="{{ url_for('member.dashboard') }}" class="btn btn-rage-outline btn-sm text-uppercase fw-bold">
                                 <i class="fas fa-id-card me-1"></i> Member Hub

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Counter POS & Payments | Front Desk Terminal{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="card bg-dark-card border border-dark-rage mb-4 rounded-3">
+        <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-rage text-white fw-bold px-3 py-2 text-uppercase">
+                    <i class="fas fa-concierge-bell me-1"></i> Front Desk Terminal
+                </span>
+                <h4 class="text-main fw-bold mb-0 text-uppercase d-none d-md-block">{{ current_user.full_name }}</h4>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('receptionist.dashboard') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-desktop me-1"></i> Desk Hub</a>
+                <a href="{{ url_for('receptionist.checkin') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-qrcode me-1"></i> Turnstile Check-in</a>
+                <a href="{{ url_for('receptionist.onboard') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-user-plus me-1"></i> Onboard Walk-in</a>
+                <a href="{{ url_for('receptionist.renewals') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-sync me-1"></i> Renewals</a>
+                <a href="{{ url_for('receptionist.payments') }}" class="btn btn-rage btn-sm text-uppercase fw-semibold"><i class="fas fa-cash-register me-1"></i> Counter POS</a>
+                <a href="{{ url_for('receptionist.enquiries') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-headset me-1"></i> Lead Desk</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Issue Counter POS Cash Receipt Form -->
+        <div class="col-lg-5">
+            <div class="card bg-dark-card border border-dark-rage p-4 p-md-5 rounded-4 shadow-lg mb-4">
+                <div class="mb-4">
+                    <h3 class="text-main fw-bold text-uppercase mb-1"><i class="fas fa-cash-register text-rage me-2"></i> Counter POS Billing</h3>
+                    <p class="text-muted small">Issue counter cash or POS receipts to registered athletes.</p>
+                </div>
+
+                <form action="{{ url_for('receptionist.payments') }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase fw-semibold">Select Member</label>
+                        <select name="user_id" class="form-select" required>
+                            <option value="" disabled selected>-- Select Member --</option>
+                            {% for member in members %}
+                                <option value="{{ member.id }}">{{ member.full_name }} ({{ member.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase fw-semibold">Amount Received (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₹</span>
+                            <input type="number" step="1" name="amount" class="form-control" placeholder="e.g. 1600" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small text-uppercase fw-semibold">Payment Collection Mode</label>
+                        <select name="payment_method" class="form-select" required>
+                            <option value="cash">Counter Cash</option>
+                            <option value="upi">Direct UPI QR Scan</option>
+                            <option value="card">Card POS Terminal</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase fw-semibold">Transaction Ref / Notes (Optional)</label>
+                        <input type="text" name="transaction_id" class="form-control" placeholder="Receipt # or UTR Ref">
+                    </div>
+
+                    <button type="submit" class="btn btn-rage w-100 py-3 text-uppercase fw-bold shadow-lg">
+                        <i class="fas fa-receipt me-2"></i> Issue Payment Receipt
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Pending UTR Verifications & Payment Logs -->
+        <div class="col-lg-7">
+            {% if pending_payments %}
+            <div class="card bg-dark-card border border-warning rounded-3 overflow-hidden mb-4">
+                <div class="card-header bg-black py-3 border-bottom border-warning d-flex justify-content-between align-items-center">
+                    <h5 class="text-warning fw-bold text-uppercase mb-0"><i class="fas fa-clock me-2"></i> Pending Member UTR Verifications</h5>
+                    <span class="badge bg-warning text-black font-monospace">{{ pending_payments|length }} Pending</span>
+                </div>
+                <div class="card-body p-3">
+                    {% for pay in pending_payments %}
+                    <div class="p-3 bg-black border border-dark-rage rounded mb-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <div class="text-main fw-bold">{{ pay.member.user.full_name if pay.member and pay.member.user else 'Athlete' }}</div>
+                            <div class="text-secondary small">UTR: <span class="text-warning font-monospace">{{ pay.utr_number or 'N/A' }}</span> | Amount: ₹{{ "{:,.0f}".format(pay.amount) }}</div>
+                            <div class="text-muted extra-small">Date: {{ pay.transaction_date.strftime('%d %b %Y, %H:%M') if pay.transaction_date else 'Today' }}</div>
+                        </div>
+                        <form action="{{ url_for('receptionist.verify_payment', payment_id=pay.id) }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-success btn-sm text-uppercase fw-bold">
+                                <i class="fas fa-check-circle me-1"></i> Verify & Activate
+                            </button>
+                        </form>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card bg-dark-card border border-dark-rage rounded-3 overflow-hidden">
+                <div class="card-header bg-black py-3 border-bottom border-dark-rage d-flex justify-content-between align-items-center">
+                    <h5 class="text-main fw-bold text-uppercase mb-0"><i class="fas fa-history text-rage me-2"></i> Counter POS Transaction History</h5>
+                    <span class="badge bg-black border border-dark-rage text-muted font-monospace">{{ payments|length }} Receipts</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="bg-black text-uppercase small text-muted">
+                            <tr>
+                                <th class="ps-4">Invoice #</th>
+                                <th>Athlete</th>
+                                <th>Amount</th>
+                                <th>Mode</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if payments %}
+                                {% for pay in payments %}
+                                <tr>
+                                    <td class="ps-4 text-main font-monospace small fw-bold">{{ pay.invoice_number }}</td>
+                                    <td>
+                                        <div class="text-main fw-bold small">{{ pay.member.user.full_name if pay.member and pay.member.user else 'Athlete' }}</div>
+                                    </td>
+                                    <td class="text-main fw-bold">₹{{ "{:,.0f}".format(pay.amount) }}</td>
+                                    <td class="text-secondary small text-uppercase">{{ pay.payment_method }}</td>
+                                    <td>
+                                        {% if pay.status == 'completed' %}
+                                            <span class="badge bg-success text-white"><i class="fas fa-check-circle me-1"></i> Completed</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-black"><i class="fas fa-clock me-1"></i> Pending</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-5">No transaction receipts logged yet.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

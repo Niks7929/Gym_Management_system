@@ -36,12 +36,14 @@ def create_app(config_name=None):
     from app.routes.admin import admin_bp
     from app.routes.trainer import trainer_bp
     from app.routes.member import member_bp
+    from app.routes.receptionist import receptionist_bp
 
     app.register_blueprint(public_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(trainer_bp, url_prefix='/trainer')
     app.register_blueprint(member_bp, url_prefix='/member')
+    app.register_blueprint(receptionist_bp, url_prefix='/receptionist')
 
     # Error handlers
     @app.errorhandler(403)

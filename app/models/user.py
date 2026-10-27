@@ -47,6 +47,7 @@ class User(UserMixin, db.Model):
     # Relationships
     member_profile = db.relationship('MemberProfile', backref='user', uselist=False, cascade='all, delete-orphan')
     trainer_profile = db.relationship('TrainerProfile', backref='user', uselist=False, cascade='all, delete-orphan')
+    receptionist_profile = db.relationship('ReceptionistProfile', backref='user', uselist=False, cascade='all, delete-orphan')
     audit_logs = db.relationship('AuditLog', backref='actor', lazy='dynamic')
 
     @property
@@ -178,5 +179,45 @@ class TrainerProfile(db.Model):
 
     def __repr__(self):
         return f"<TrainerProfile {self.user.email if self.user else self.id}>"
+
+class ReceptionistProfile(db.Model):
+    __tablename__ = 'receptionists'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), unique=True, nullable=False)
+    
+    shift = db.Column(db.String(50), default='Morning') # Morning, Evening, Night, Rotational
+    desk_number = db.Column(db.String(20), default='Front-Desk-1')
+    
+    @property
+    def shift_timing(self):
+        return self.shift
+
+    @property
+    def counter_number(self):
+        return self.desk_number
+
+    @property
+    def full_name(self):
+        return self.user.full_name if self.user else ""
+
+    @property
+    def email(self):
+        return self.user.email if self.user else ""
+
+    @property
+    def phone(self):
+        return self.user.phone if self.user else ""
+
+    @property
+    def is_active(self):
+        return self.user.is_active if self.user else True
+
+    @property
+    def is_blocked(self):
+        return self.user.is_blocked if self.user else False
+
+    def __repr__(self):
+        return f"<ReceptionistProfile {self.user.email if self.user else self.id}>"
 
 

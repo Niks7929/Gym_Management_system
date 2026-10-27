@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Member Registration | SETFIT GYM{% endblock %}
+{% block title %}Account Registration | SETFIT GYM{% endblock %}
 
 {% block content %}
 <section class="py-5 bg-darker min-vh-100 d-flex align-items-center">
     <div class="container py-4">
         <div class="row justify-content-center">
-            <div class="col-lg-6 col-md-8 col-sm-11">
+            <div class="col-lg-7 col-md-9 col-sm-11">
                 <div class="card bg-dark-card border border-dark-rage p-4 p-md-5 rounded-4 shadow-lg">
                     <!-- Brand Header -->
                     <div class="text-center mb-4">
@@ -18,80 +18,182 @@
                         <h2 class="text-main fw-bold text-uppercase mb-1">
                             SETFIT <span class="text-rage">GYM</span>
                         </h2>
-                        <p class="text-secondary fw-semibold text-uppercase small letter-spacing-1 mb-2">Create Account</p>
-                        <p class="text-muted small mb-0">Fill in the essential details below to register.</p>
+                        <p class="text-secondary fw-semibold text-uppercase small letter-spacing-1 mb-2" id="registrationSubheading">Create Account</p>
+                        <p class="text-muted small mb-0">Select your role to access customized profile credentials.</p>
                     </div>
 
-                    <!-- 5-Field Simplified Registration Form -->
-                    <form method="POST" action="{{ url_for('auth.register') }}">
+                    <!-- Role Switcher (3 Distinct Roles) -->
+                    <div class="mb-4">
+                        <label class="form-label small text-uppercase fw-semibold mb-2 text-muted">Select Your Role</label>
+                        <div class="row g-2" id="roleSelectorCards">
+                            <div class="col-4">
+                                <button type="button" class="btn btn-outline-rage w-100 py-3 text-center role-select-btn active" id="btnRoleMember" onclick="setRole('member')">
+                                    <i class="fas fa-id-card d-block fs-4 mb-1"></i>
+                                    <span class="small fw-bold text-uppercase">Member / Athlete</span>
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-outline-secondary w-100 py-3 text-center role-select-btn" id="btnRoleTrainer" onclick="setRole('trainer')">
+                                    <i class="fas fa-user-ninja d-block fs-4 mb-1"></i>
+                                    <span class="small fw-bold text-uppercase">Trainer / Coach</span>
+                                </button>
+                            </div>
+                            <div class="col-4">
+                                <button type="button" class="btn btn-outline-secondary w-100 py-3 text-center role-select-btn" id="btnRoleReceptionist" onclick="setRole('receptionist')">
+                                    <i class="fas fa-concierge-bell d-block fs-4 mb-1"></i>
+                                    <span class="small fw-bold text-uppercase">Front Desk / Receptionist</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Registration Form -->
+                    <form method="POST" action="{{ url_for('auth.register') }}" id="registrationForm">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <input type="hidden" name="role" id="selectedRoleInput" value="{{ request.args.get('role', 'member') }}">
 
-                        <!-- 1. Register As (Role Selector) -->
-                        <div class="mb-3">
-                            <label class="form-label small text-uppercase fw-semibold">Register As</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user-circle"></i></span>
-                                <select name="role" id="registerRoleSelect" class="form-select py-2" onchange="togglePlanSelection(this.value)" required>
-                                    <option value="member" selected>Member / Athlete</option>
-                                    <option value="trainer">Trainer / Coach</option>
-                                </select>
+                        <!-- Common Credential Fields -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-12">
+                                <label class="form-label small text-uppercase fw-semibold">Full Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    <input type="text" name="full_name" class="form-control py-2" placeholder="Enter your full name" required autofocus>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-uppercase fw-semibold">Email Address</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input type="email" name="email" class="form-control py-2" placeholder="name@domain.com" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-uppercase fw-semibold">Contact / Phone Number</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
+                                    <input type="tel" name="phone" class="form-control py-2" placeholder="+91 98765 43210" required>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small text-uppercase fw-semibold">Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                    <input type="password" name="password" class="form-control py-2" placeholder="••••••••" minlength="6" required>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 2. Full Name -->
-                        <div class="mb-3">
-                            <label class="form-label small text-uppercase fw-semibold">Full Name</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input type="text" name="full_name" class="form-control py-2" placeholder="Enter your full name" required autofocus>
+                        <!-- =========================================================================
+                             ROLE 1: MEMBER-SPECIFIC FIELDS (Includes Membership Plan)
+                             ========================================================================= -->
+                        <div id="memberFieldsGroup" class="role-specific-section border-top border-dark-rage pt-3 mb-3">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="fas fa-id-card text-rage"></i>
+                                <span class="small text-uppercase fw-bold text-rage">Athlete Membership Details</span>
+                            </div>
+
+                            <!-- 1. Membership Plan Selection (ONLY FOR MEMBER) -->
+                            <div class="mb-3">
+                                <label class="form-label small text-uppercase fw-semibold">Membership Plan / Tier</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-tag"></i></span>
+                                    <select name="plan_id" class="form-select py-2">
+                                        {% for plan in plans %}
+                                            <option value="{{ plan.id }}" {{ 'selected' if selected_plan_id == plan.id }}>
+                                                {{ plan.name }} — ₹{{ "{:,.0f}".format(plan.price) }} ({{ plan.duration_months }} Months)
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <span class="text-muted extra-small">Choose your subscription tier. Monthly, quarterly, and annual packages available in INR.</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-uppercase fw-semibold">Primary Fitness Goal</label>
+                                    <select name="fitness_goal" class="form-select py-2">
+                                        <option value="Strength & Hypertrophy" selected>Strength & Hypertrophy</option>
+                                        <option value="Powerlifting & Heavy Compound">Powerlifting & Heavy Compound</option>
+                                        <option value="Fat Loss & Conditioning">Fat Loss & Conditioning</option>
+                                        <option value="General Athletic Fitness">General Athletic Fitness</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-uppercase fw-semibold">Emergency Contact</label>
+                                    <input type="tel" name="emergency_contact" class="form-control py-2" placeholder="+91 98765 88888">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 3. Email Address -->
-                        <div class="mb-3">
-                            <label class="form-label small text-uppercase fw-semibold">Email Address</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input type="email" name="email" class="form-control py-2" placeholder="name@domain.com" required>
+                        <!-- =========================================================================
+                             ROLE 2: TRAINER-SPECIFIC FIELDS (Specialization & Experience)
+                             ========================================================================= -->
+                        <div id="trainerFieldsGroup" class="role-specific-section border-top border-dark-rage pt-3 mb-3" style="display: none;">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="fas fa-user-ninja text-warning"></i>
+                                <span class="small text-uppercase fw-bold text-warning">Coach Professional Credentials</span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-uppercase fw-semibold">Coaching Specialization</label>
+                                    <select name="specialization" class="form-select py-2">
+                                        <option value="Strength & Conditioning" selected>Strength & Conditioning</option>
+                                        <option value="Powerlifting & Heavy Lifts">Powerlifting & Heavy Lifts</option>
+                                        <option value="Hypertrophy & Bodybuilding">Hypertrophy & Bodybuilding</option>
+                                        <option value="Functional Fitness & Crossfit">Functional Fitness & Crossfit</option>
+                                        <option value="Fat Loss & Athletic Conditioning">Fat Loss & Athletic Conditioning</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-uppercase fw-semibold">Experience Level</label>
+                                    <select name="experience_years" class="form-select py-2">
+                                        <option value="1">1 - 2 Years Coaching</option>
+                                        <option value="3" selected>3 - 5 Years Coaching</option>
+                                        <option value="5">5+ Years Veteran Coach</option>
+                                    </select>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label small text-uppercase fw-semibold">Certifications & Licenses</label>
+                                    <input type="text" name="certifications" class="form-control py-2" placeholder="e.g. ISSA Certified Strength Coach, ACE, K11">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- 4. Contact Number -->
-                        <div class="mb-3">
-                            <label class="form-label small text-uppercase fw-semibold">Contact / Phone Number</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-phone-alt"></i></span>
-                                <input type="tel" name="phone" class="form-control py-2" placeholder="+91 98765 43210" required>
+                        <!-- =========================================================================
+                             ROLE 3: RECEPTIONIST-SPECIFIC FIELDS (Shift & Desk Number)
+                             ========================================================================= -->
+                        <div id="receptionistFieldsGroup" class="role-specific-section border-top border-dark-rage pt-3 mb-3" style="display: none;">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="fas fa-concierge-bell text-primary"></i>
+                                <span class="small text-uppercase fw-bold text-primary">Front Desk Terminal Configuration</span>
                             </div>
-                        </div>
 
-                        <!-- 5. Password -->
-                        <div class="mb-3">
-                            <label class="form-label small text-uppercase fw-semibold">Password</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input type="password" name="password" class="form-control py-2" placeholder="••••••••" minlength="6" required>
+                            <div class="alert bg-black border border-primary text-secondary small p-3 mb-3">
+                                <i class="fas fa-info-circle text-primary me-2"></i>
+                                <strong>Official Terminal:</strong> Operations run on 1 dedicated front-desk account for 24/7 QR check-ins, onboarding, and counter POS billing.
                             </div>
-                        </div>
 
-                        <!-- 6. Membership Tier (Shown for Member role) -->
-                        <div class="mb-4" id="planSelectionGroup">
-                            <label class="form-label small text-uppercase fw-semibold">Membership Tier</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-id-card"></i></span>
-                                <select name="plan_id" class="form-select py-2">
-                                    {% for plan in plans %}
-                                        <option value="{{ plan.id }}" {{ 'selected' if selected_plan_id == plan.id }}>
-                                            {{ plan.name }} — ₹{{ "{:,.0f}".format(plan.price) }} ({{ plan.duration_months }} Months)
-                                        </option>
-                                    {% endfor %}
-                                </select>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small text-uppercase fw-semibold">Assigned Shift</label>
+                                    <select name="shift" class="form-select py-2">
+                                        <option value="Morning Shift (05:30 AM - 02:00 PM)" selected>Morning Shift (05:30 AM - 02:00 PM)</option>
+                                        <option value="Evening Shift (02:00 PM - 10:30 PM)">Evening Shift (02:00 PM - 10:30 PM)</option>
+                                        <option value="General Full Shift">General Full Shift</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small text-uppercase fw-semibold">Counter Station</label>
+                                    <input type="text" name="desk_number" class="form-control py-2" value="Front Desk #1" readonly>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-rage w-100 py-3 text-uppercase fw-bold shadow-lg fs-6">
-                            <i class="fas fa-user-plus me-2"></i> Register Account
+                        <button type="submit" class="btn btn-rage w-100 py-3 text-uppercase fw-bold shadow-lg fs-6 mt-3" id="submitBtn">
+                            <i class="fas fa-user-plus me-2"></i> <span id="submitBtnText">Register Athlete Account</span>
                         </button>
                     </form>
 
@@ -110,15 +212,65 @@
 
 {% block extra_scripts %}
 <script>
-function togglePlanSelection(role) {
-    const planGroup = document.getElementById('planSelectionGroup');
-    if (planGroup) {
-        if (role === 'member') {
-            planGroup.style.display = 'block';
-        } else {
-            planGroup.style.display = 'none';
+function setRole(role) {
+    // 1. Update Hidden Role Input
+    const roleInput = document.getElementById('selectedRoleInput');
+    if (roleInput) {
+        roleInput.value = role;
+    }
+
+    // 2. Update Button Styles
+    const btnMember = document.getElementById('btnRoleMember');
+    const btnTrainer = document.getElementById('btnRoleTrainer');
+    const btnReceptionist = document.getElementById('btnRoleReceptionist');
+
+    [btnMember, btnTrainer, btnReceptionist].forEach(btn => {
+        if (btn) {
+            btn.classList.remove('active', 'btn-outline-rage', 'btn-outline-warning', 'btn-outline-primary');
+            btn.classList.add('btn-outline-secondary');
         }
+    });
+
+    if (role === 'member' && btnMember) {
+        btnMember.classList.remove('btn-outline-secondary');
+        btnMember.classList.add('active', 'btn-outline-rage');
+    } else if (role === 'trainer' && btnTrainer) {
+        btnTrainer.classList.remove('btn-outline-secondary');
+        btnTrainer.classList.add('active', 'btn-outline-warning');
+    } else if (role === 'receptionist' && btnReceptionist) {
+        btnReceptionist.classList.remove('btn-outline-secondary');
+        btnReceptionist.classList.add('active', 'btn-outline-primary');
+    }
+
+    // 3. Toggle Role Sections (Plan is ONLY in Member section)
+    const memberGroup = document.getElementById('memberFieldsGroup');
+    const trainerGroup = document.getElementById('trainerFieldsGroup');
+    const recGroup = document.getElementById('receptionistFieldsGroup');
+    const subheading = document.getElementById('registrationSubheading');
+    const submitBtnText = document.getElementById('submitBtnText');
+
+    if (memberGroup) memberGroup.style.display = (role === 'member') ? 'block' : 'none';
+    if (trainerGroup) trainerGroup.style.display = (role === 'trainer') ? 'block' : 'none';
+    if (recGroup) recGroup.style.display = (role === 'receptionist') ? 'block' : 'none';
+
+    // 4. Update texts dynamically
+    if (role === 'member') {
+        if (subheading) subheading.innerText = 'Athlete Member Registration';
+        if (submitBtnText) submitBtnText.innerText = 'Register Athlete Account';
+    } else if (role === 'trainer') {
+        if (subheading) subheading.innerText = 'Coach / Trainer Registration';
+        if (submitBtnText) submitBtnText.innerText = 'Register Coach Account';
+    } else if (role === 'receptionist') {
+        if (subheading) subheading.innerText = 'Front Desk Terminal Setup';
+        if (submitBtnText) submitBtnText.innerText = 'Establish Front Desk Terminal';
     }
 }
+
+// Auto-select role based on query string on load
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialRole = urlParams.get('role') || document.getElementById('selectedRoleInput').value || 'member';
+    setRole(initialRole);
+});
 </script>
 {% endblock %}

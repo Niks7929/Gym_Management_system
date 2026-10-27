@@ -173,6 +173,33 @@ class SetfitDarkRageTestCase(unittest.TestCase):
         self.assertIn(b'Trainer', response.data)
         print("[PASS] test_06_trainer_login_flow")
 
+    def test_07_receptionist_login_and_desk_flow(self):
+        # 1. Login with dedicated Receptionist account
+        response = self.client.post('/auth/login', data={
+            'email': 'receptionist@setfitgym.com',
+            'password': 'Desk@2026!',
+            'role': 'receptionist'
+        }, follow_redirects=True)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Front Desk', response.data)
+
+        # 2. Check front-desk operations access
+        routes = [
+            '/receptionist/dashboard',
+            '/receptionist/checkin',
+            '/receptionist/onboard',
+            '/receptionist/renewals',
+            '/receptionist/payments',
+            '/receptionist/enquiries'
+        ]
+        for r in routes:
+            res = self.client.get(r)
+            self.assertEqual(res.status_code, 200, f"Route {r} returned {res.status_code}")
+        
+        # 3. Logout receptionist
+        self.client.get('/auth/logout', follow_redirects=True)
+        print("[PASS] test_07_receptionist_login_and_desk_flow")
+
     def test_08_admin_security_passcode_flow(self):
         # Invalid passcode attempt
         res_fail = self.client.post('/auth/admin-access', data={
@@ -290,6 +317,173 @@ class SetfitDarkRageTestCase(unittest.TestCase):
         self.assertEqual(mem.status, 'active')
         self.assertTrue(mem.is_verified)
         print("[PASS] test_12_end_to_end_payment_and_admin_verification")
+
+    def test_13_single_admin_single_receptionist_and_encryption_integrity(self):
+        # 1. Verify Exactly 1 Master Admin in system
+        admins = User.query.filter_by(role='admin').all()
+        self.assertEqual(len(admins), 1, f"Expected exactly 1 admin, found {len(admins)}")
+        admin = admins[0]
+        self.assertEqual(admin.email, 'admin@setfitgym.com')
+
+        # 2. Verify Exactly 1 Front Desk Receptionist in system
+        receptionists = User.query.filter_by(role='receptionist').all()
+        self.assertEqual(len(receptionists), 1, f"Expected exactly 1 receptionist, found {len(receptionists)}")
+        rec = receptionists[0]
+        self.assertEqual(rec.email, 'receptionist@setfitgym.com')
+
+        # 3. Verify Admin Password Encryption (Cryptographic Hash)
+        self.assertIsNotNone(admin.password_hash)
+        self.assertNotEqual(admin.password_hash, 'Admin@SetFit2026!')
+        self.assertTrue(admin.password_hash.startswith(('scrypt:', 'pbkdf2:')))
+        self.assertTrue(admin.check_password('Admin@SetFit2026!'))
+        self.assertFalse(admin.check_password('IncorrectPassword'))
+
+        # 4. Verify Receptionist Password Encryption
+        self.assertIsNotNone(rec.password_hash)
+        self.assertNotEqual(rec.password_hash, 'Desk@2026!')
+        self.assertTrue(rec.password_hash.startswith(('scrypt:', 'pbkdf2:')))
+        self.assertTrue(rec.check_password('Desk@2026!'))
+        self.assertFalse(rec.check_password('WrongPass'))
+
+        # 5. Verify Registration Page includes Front Desk / Receptionist option
+        reg_page_res = self.client.get('/auth/register')
+        self.assertEqual(reg_page_res.status_code, 200)
+        self.assertIn(b'Front Desk / Receptionist', reg_page_res.data)
+
+        # 6. Verify attempting to register duplicate receptionist is blocked
+        dup_rec_res = self.client.post('/auth/register', data={
+            'role': 'receptionist',
+            'full_name': 'Duplicate Receptionist',
+            'email': 'another_rec@test.com',
+            'phone': '+91 99999 00000',
+            'password': 'Password123!'
+        }, follow_redirects=True)
+        self.assertIn(b'Only 1 official Front Desk / Receptionist account is allowed', dup_rec_res.data)
+        # Ensure still only 1 receptionist exists
+        self.assertEqual(User.query.filter_by(role='receptionist').count(), 1)
+
+        # 7. Verify Receptionist is strictly blocked from Admin terminal
+        self.client.post('/auth/login', data={
+            'email': 'receptionist@setfitgym.com',
+            'password': 'Desk@2026!',
+            'role': 'receptionist'
+        }, follow_redirects=True)
+        admin_res = self.client.get('/admin/dashboard', follow_redirects=True)
+        # Should be redirected / unauthorized
+        self.assertNotIn(b'Executive Analytics', admin_res.data)
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        print("[PASS] test_13_single_admin_single_receptionist_and_encryption_integrity")
+
+    def test_14_landing_inquiry_to_receptionist_and_trainer_assignment_flow(self):
+        # 1. Visitor submits enquiry from landing page
+        enq_res = self.client.post('/enquiry/submit', data={
+            'full_name': 'Rohan Joshi',
+            'phone': '+91 98220 12345',
+            'email': 'rohan.joshi@test.com',
+            'interested_program': 'Powerlifting & Hypertrophy',
+            'message': 'Interested in joining SETFIT gym.'
+        }, follow_redirects=True)
+        self.assertEqual(enq_res.status_code, 200)
+
+        # 2. Receptionist logs in and checks Lead Desk
+        self.client.post('/auth/login', data={
+            'email': 'receptionist@setfitgym.com',
+            'password': 'Desk@2026!',
+            'role': 'receptionist'
+        }, follow_redirects=True)
+        rec_lead_res = self.client.get('/receptionist/enquiries')
+        self.assertEqual(rec_lead_res.status_code, 200)
+        self.assertIn(b'Rohan Joshi', rec_lead_res.data)
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        # 3. Master Admin assigns coach to member
+        member_user = User.query.filter_by(email='temp_test_member@test.com').first()
+        trainer_user = User.query.filter_by(email='temp_test_trainer@test.com').first()
+        self.assertIsNotNone(member_user)
+        self.assertIsNotNone(trainer_user)
+
+        self.client.post('/auth/admin-access', data={
+            'email': 'admin@setfitgym.com',
+            'password': 'Admin@SetFit2026!',
+            'admin_secret': 'SETFIT_MASTER_ADMIN_PASSCODE_2026'
+        }, follow_redirects=True)
+
+        assign_res = self.client.post('/admin/members/assign-coach', data={
+            'member_id': member_user.member_profile.id,
+            'trainer_id': trainer_user.trainer_profile.id
+        }, follow_redirects=True)
+        self.assertEqual(assign_res.status_code, 200)
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        # 4. Trainer logs in and sees assigned member in roster
+        self.client.post('/auth/login', data={
+            'email': 'temp_test_trainer@test.com',
+            'password': 'Trainer@2026!',
+            'role': 'trainer'
+        }, follow_redirects=True)
+        trainer_dash = self.client.get('/trainer/dashboard')
+        self.assertEqual(trainer_dash.status_code, 200)
+        self.assertIn(b'Test Member', trainer_dash.data)
+
+        # Trainer creates custom workout split for this member
+        wo_res = self.client.post('/trainer/workouts/create', data={
+            'member_id': member_user.member_profile.id,
+            'title': 'Bulking Heavy Split',
+            'goal': 'Strength & Hypertrophy',
+            'days_per_week': 5,
+            'description': 'Heavy compound lifting progression'
+        }, follow_redirects=True)
+        self.assertEqual(wo_res.status_code, 200)
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        # 5. Member logs in and sees assigned coach & workout split
+        self.client.post('/auth/login', data={
+            'email': 'temp_test_member@test.com',
+            'password': 'Member@2026!',
+            'role': 'member'
+        }, follow_redirects=True)
+        member_dash = self.client.get('/member/dashboard')
+        self.assertEqual(member_dash.status_code, 200)
+        self.assertIn(b'Test Trainer', member_dash.data)
+        self.assertIn(b'Bulking Heavy Split', member_dash.data)
+
+        # Member views full workout details
+        member_wo = self.client.get('/member/workout')
+        self.assertEqual(member_wo.status_code, 200)
+        self.assertIn(b'Bulking Heavy Split', member_wo.data)
+        self.client.get('/auth/logout', follow_redirects=True)
+
+        print("[PASS] test_14_landing_inquiry_to_receptionist_and_trainer_assignment_flow")
+
+    def test_15_role_specific_registration_fields_and_plans_isolation(self):
+        # 1. Register Trainer with trainer-specific fields (No Plan)
+        t_email = f"coach_auto_{int(datetime.utcnow().timestamp())}@test.com"
+        reg_t = self.client.post('/auth/register', data={
+            'role': 'trainer',
+            'full_name': 'Automated Coach',
+            'email': t_email,
+            'phone': '+91 98888 11111',
+            'password': 'Password123!',
+            'specialization': 'Powerlifting & Heavy Lifts',
+            'experience_years': 4,
+            'certifications': 'ISSA Certified'
+        }, follow_redirects=True)
+        self.assertEqual(reg_t.status_code, 200)
+
+        created_trainer = User.query.filter_by(email=t_email).first()
+        self.assertIsNotNone(created_trainer)
+        self.assertEqual(created_trainer.role, 'trainer')
+        self.assertIsNotNone(created_trainer.trainer_profile)
+        self.assertEqual(created_trainer.trainer_profile.specialization, 'Powerlifting & Heavy Lifts')
+        self.assertEqual(created_trainer.trainer_profile.experience_years, 4)
+        self.assertIsNone(created_trainer.member_profile)
+
+        # Cleanup
+        db.session.delete(created_trainer.trainer_profile)
+        db.session.delete(created_trainer)
+        db.session.commit()
+        print("[PASS] test_15_role_specific_registration_fields_and_plans_isolation")
 
 if __name__ == '__main__':
     unittest.main()

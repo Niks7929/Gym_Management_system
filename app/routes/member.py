@@ -5,7 +5,6 @@ from flask_login import login_required, current_user
 from app.extensions import db
 from app.models.membership import MembershipPlan, Membership, Payment
 from app.models.training import WorkoutPlan, DietPlan, TrainerMemberAssignment
-from app.models.attendance import Attendance
 from app.models.operations import GymSetting
 from app.services.security import role_required
 from app.services.audit import log_audit_event
@@ -39,12 +38,8 @@ def dashboard():
     
     # Coach assignment
     assignment = TrainerMemberAssignment.query.filter_by(member_id=profile.id, is_active=True).first()
-    trainer = assignment.trainer if assignment else None
+    trainer = assignment.trainer.user if (assignment and assignment.trainer) else None
 
-    # Attendance streak
-    month_start = date(date.today().year, date.today().month, 1)
-    monthly_visits = Attendance.query.filter(Attendance.member_id == profile.id, Attendance.date >= month_start).count()
-    
     # UPI QR URL generation
     settings = GymSetting.query.first()
     upi_id = settings.upi_id if settings and settings.upi_id else 'setfit@upi'
@@ -66,7 +61,6 @@ def dashboard():
         workout=workout,
         diet=diet,
         trainer=trainer,
-        monthly_visits=monthly_visits,
         upi_id=upi_id,
         qr_code_url=qr_code_url,
         plans=plans
@@ -144,12 +138,6 @@ def diet():
     profile = current_user.member_profile
     diet_plan = DietPlan.query.filter_by(member_id=profile.id, is_active=True).order_by(DietPlan.id.desc()).first()
     return render_template('member/diet.html', profile=profile, diet=diet_plan)
-
-@member_bp.route('/attendance')
-def attendance():
-    profile = current_user.member_profile
-    attendances_list = Attendance.query.filter_by(member_id=profile.id).order_by(Attendance.date.desc()).all()
-    return render_template('member/attendance.html', profile=profile, attendances=attendances_list)
 
 @member_bp.route('/payments')
 def payments():

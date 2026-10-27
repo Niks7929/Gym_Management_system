@@ -37,8 +37,7 @@ def dashboard():
     ).count()
     
     total_trainers = TrainerProfile.query.count()
-    
-    today_checkins = Attendance.query.filter_by(date=today).count()
+    today_checkins = 0
     
     # Revenue calculations
     total_revenue = db.session.query(func.sum(Payment.amount)).filter(Payment.status == 'completed').scalar() or 0.0
@@ -115,8 +114,30 @@ def members():
         
     members_list = query.order_by(MemberProfile.id.desc()).all()
     plans = MembershipPlan.query.filter_by(is_active=True).all()
+    trainers = TrainerProfile.query.join(User).filter(User.is_active == True).all()
     
-    return render_template('admin/members.html', members=members_list, plans=plans, status_filter=status_filter, search=search)
+    return render_template('admin/members.html', members=members_list, plans=plans, trainers=trainers, status_filter=status_filter, search=search)
+
+@admin_bp.route('/members/assign-coach', methods=['POST'])
+def assign_coach():
+    member_profile_id = request.form.get('member_id', type=int)
+    trainer_profile_id = request.form.get('trainer_id', type=int)
+    
+    m_prof = MemberProfile.query.get(member_profile_id)
+    t_prof = TrainerProfile.query.get(trainer_profile_id)
+    
+    if m_prof and t_prof:
+        # Deactivate old assignments
+        TrainerMemberAssignment.query.filter_by(member_id=m_prof.id).update({'is_active': False})
+        assign = TrainerMemberAssignment(trainer_id=t_prof.id, member_id=m_prof.id, is_active=True, notes="Assigned by Master Admin")
+        db.session.add(assign)
+        db.session.commit()
+        log_audit_event('ADMIN_ASSIGNED_COACH', f"Admin assigned Coach {t_prof.full_name} to Member {m_prof.full_name}", current_user)
+        flash(f"Coach {t_prof.full_name} assigned to athlete {m_prof.full_name} successfully!", 'success')
+    else:
+        flash("Member or Coach profile not found.", 'danger')
+        
+    return redirect(url_for('admin.members'))
 
 @admin_bp.route('/members/add', methods=['POST'])
 def add_member():

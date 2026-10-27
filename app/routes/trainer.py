@@ -5,7 +5,6 @@ from flask_login import login_required, current_user
 from app.extensions import db
 from app.models.user import User, MemberProfile, TrainerProfile
 from app.models.training import WorkoutPlan, WorkoutExercise, Exercise, DietPlan, DietMeal, TrainerMemberAssignment
-from app.models.attendance import Attendance
 from app.services.security import role_required
 from app.services.audit import log_audit_event
 
@@ -60,11 +59,6 @@ def dashboard():
         DietPlan.query.filter_by(trainer_id=trainer_id).order_by(DietPlan.created_at.desc()).all() if trainer_id else []
     )
 
-    today = date.today()
-    today_checkins = Attendance.query.filter(
-        Attendance.member_id.in_(assigned_member_ids), Attendance.date == today
-    ).count() if assigned_member_ids else 0
-
     all_members = get_all_gym_members()
 
     return render_template(
@@ -76,7 +70,6 @@ def dashboard():
         assigned_count=len(assigned_clients),
         active_workouts=len(workout_plans),
         active_diets=len(diet_plans),
-        today_checkins=today_checkins,
         assignments=assignments,
         all_members=all_members
     )
@@ -125,8 +118,6 @@ def assign_client():
             flash('Member profile not found.', 'danger')
 
     return redirect(url_for('trainer.clients'))
-
-@trainer_bp.route('/workouts', methods=['GET', 'POST'])
 
 @trainer_bp.route('/workouts/create', methods=['POST'])
 def create_workout():
@@ -193,6 +184,7 @@ def create_workout():
     flash(f"Workout split program '{title}' assigned to athlete successfully!", 'success')
     return redirect(url_for('trainer.workouts'))
 
+@trainer_bp.route('/workouts', methods=['GET'])
 @trainer_bp.route('/workouts_view', methods=['GET'])
 def workouts():
     profile = get_or_create_trainer_profile()
@@ -217,8 +209,6 @@ def workouts():
         assigned_clients=assigned_clients,
         assignments=assignments
     )
-
-@trainer_bp.route('/diets', methods=['GET', 'POST'])
 
 @trainer_bp.route('/diets/create', methods=['POST'])
 def create_diet():
@@ -292,6 +282,7 @@ def create_diet():
     flash(f"Nutrition blueprint '{title}' assigned to athlete successfully!", 'success')
     return redirect(url_for('trainer.diets'))
 
+@trainer_bp.route('/diets', methods=['GET'])
 @trainer_bp.route('/diets_view', methods=['GET'])
 def diets():
     profile = get_or_create_trainer_profile()

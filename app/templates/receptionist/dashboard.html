@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Front Desk Terminal | SETFIT GYM{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-5 py-4 bg-darker min-vh-100">
+    <div class="card bg-dark-card border border-dark-rage mb-4 rounded-3">
+        <div class="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge bg-rage text-white fw-bold px-3 py-2 text-uppercase">
+                    <i class="fas fa-concierge-bell me-1"></i> Front Desk Terminal
+                </span>
+                <h4 class="text-main fw-bold mb-0 text-uppercase d-none d-md-block">{{ current_user.full_name }}</h4>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a href="{{ url_for('receptionist.dashboard') }}" class="btn btn-rage btn-sm text-uppercase fw-semibold"><i class="fas fa-desktop me-1"></i> Desk Hub</a>
+                <a href="{{ url_for('receptionist.checkin') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-qrcode me-1"></i> Turnstile Check-in</a>
+                <a href="{{ url_for('receptionist.onboard') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-user-plus me-1"></i> Onboard Walk-in</a>
+                <a href="{{ url_for('receptionist.renewals') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-sync me-1"></i> Renewals</a>
+                <a href="{{ url_for('receptionist.payments') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-cash-register me-1"></i> Counter POS</a>
+                <a href="{{ url_for('receptionist.enquiries') }}" class="btn btn-outline-light btn-sm text-uppercase fw-semibold"><i class="fas fa-headset me-1"></i> Lead Desk</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Metric Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-bold">Today's Total Check-ins</span>
+                    <i class="fas fa-qrcode text-rage fs-4"></i>
+                </div>
+                <h2 class="text-main fw-bold mb-0">{{ today_checkins }}</h2>
+                <span class="text-muted extra-small">Athletes checked in today</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-bold">Expiring Soon (Next 7 Days)</span>
+                    <i class="fas fa-clock text-warning fs-4"></i>
+                </div>
+                <h2 class="text-warning fw-bold mb-0">{{ expiring_soon }}</h2>
+                <span class="text-muted extra-small">Memberships up for renewal</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-dark-card border border-dark-rage p-4 rounded-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted small text-uppercase fw-bold">New Assessment Leads</span>
+                    <i class="fas fa-headset text-info fs-4"></i>
+                </div>
+                <h2 class="text-info fw-bold mb-0">{{ new_leads|length }}</h2>
+                <span class="text-muted extra-small">Pending prospect enquiries</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Recent Turnstile Check-ins -->
+        <div class="col-lg-7">
+            <div class="card bg-dark-card border border-dark-rage rounded-3 overflow-hidden h-100">
+                <div class="card-header bg-black py-3 border-bottom border-dark-rage d-flex justify-content-between align-items-center">
+                    <h5 class="text-main fw-bold text-uppercase mb-0"><i class="fas fa-history text-rage me-2"></i> Recent Turnstile Check-ins</h5>
+                    <a href="{{ url_for('receptionist.checkin') }}" class="btn btn-rage btn-sm text-uppercase fw-bold">
+                        <i class="fas fa-bolt me-1"></i> Fast Check-in
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover align-middle mb-0">
+                        <thead class="bg-black text-uppercase small text-muted">
+                            <tr>
+                                <th class="ps-4">Athlete</th>
+                                <th>Check-in</th>
+                                <th>Status</th>
+                                <th class="pe-4 text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_attendances %}
+                                {% for att in recent_attendances %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="text-main fw-bold">{{ att.member.user.full_name if att.member and att.member.user else 'Athlete' }}</div>
+                                        <span class="badge bg-black border border-dark-rage text-muted font-monospace">{{ att.member.member_code if att.member else 'SFR-MEMBER' }}</span>
+                                    </td>
+                                    <td class="text-secondary small font-monospace">{{ att.check_in_time.strftime('%I:%M %p') if att.check_in_time else '05:30 AM' }}</td>
+                                    <td>
+                                        {% if att.check_out_time %}
+                                            <span class="badge bg-secondary text-white"><i class="fas fa-sign-out-alt me-1"></i> Checked Out</span>
+                                        {% else %}
+                                            <span class="badge bg-success text-white"><i class="fas fa-check-circle me-1"></i> On Gym Floor</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="pe-4 text-end">
+                                        <a href="{{ url_for('receptionist.checkin') }}" class="btn btn-sm btn-outline-light">Scan / Out</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-5">No check-in entries logged yet today.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expiring Soon & Pending Verifications -->
+        <div class="col-lg-5">
+            <div class="card bg-dark-card border border-warning rounded-3 overflow-hidden h-100">
+                <div class="card-header bg-black py-3 border-bottom border-warning d-flex justify-content-between align-items-center">
+                    <h5 class="text-warning fw-bold text-uppercase mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Memberships Expiring Soon</h5>
+                    <a href="{{ url_for('receptionist.renewals') }}" class="btn btn-outline-warning btn-sm text-uppercase fw-bold">Renewals</a>
+                </div>
+                <div class="card-body p-4">
+                    {% if pending_verifications %}
+                        <div class="mb-4">
+                            <h6 class="text-main fw-bold text-uppercase mb-2"><i class="fas fa-clock text-warning me-1"></i> Pending UTR Verifications ({{ pending_verifications|length }})</h6>
+                            {% for pay in pending_verifications %}
+                            <div class="p-3 bg-black border border-dark-rage rounded mb-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-main fw-bold small">{{ pay.member.user.full_name if pay.member and pay.member.user else 'Athlete' }}</div>
+                                    <div class="text-muted extra-small">UTR: {{ pay.utr_number or 'N/A' }} | ₹{{ "{:,.0f}".format(pay.amount) }}</div>
+                                </div>
+                                <form action="{{ url_for('receptionist.verify_payment', payment_id=pay.id) }}" method="POST">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="btn btn-success btn-sm text-uppercase fw-bold">Verify</button>
+                                </form>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% if expiring_soon > 0 %}
+                        <p class="text-secondary small mb-3">Athletes whose memberships expire within the next 7 days:</p>
+                        <a href="{{ url_for('receptionist.renewals') }}" class="btn btn-warning text-black w-100 py-2 text-uppercase fw-bold">
+                            <i class="fas fa-sync me-1"></i> Process Renewals Now
+                        </a>
+                    {% else %}
+                        <div class="text-center text-muted py-4">
+                            <i class="fas fa-check-circle text-success fs-2 mb-2 d-block"></i>
+                            No memberships expiring within the next 7 days.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,4 +1,4 @@
-from app.models.user import Role, User, MemberProfile, TrainerProfile
+from app.models.user import Role, User, MemberProfile, TrainerProfile, ReceptionistProfile
 from app.models.membership import MembershipPlan, Membership, Payment, Enquiry
 from app.models.attendance import Attendance
 from app.models.training import Exercise, WorkoutPlan, WorkoutExercise, DietPlan, DietMeal, TrainerMemberAssignment
@@ -6,7 +6,7 @@ from app.models.operations import GymSetting, Equipment, EquipmentMaintenance, P
 from app.models.security import AuditLog, PasswordReset
 
 __all__ = [
-    'Role', 'User', 'MemberProfile', 'TrainerProfile',
+    'Role', 'User', 'MemberProfile', 'TrainerProfile', 'ReceptionistProfile',
     'MembershipPlan', 'Membership', 'Payment', 'Enquiry',
     'Attendance',
     'Exercise', 'WorkoutPlan', 'WorkoutExercise', 'DietPlan', 'DietMeal', 'TrainerMemberAssignment',

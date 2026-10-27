@@ -24,6 +24,7 @@
                         <th>Member Code</th>
                         <th>Current Plan</th>
                         <th>Expiry Date</th>
+                        <th>Assigned Coach</th>
                         <th>Account Status</th>
                         <th class="pe-4 text-end">Actions</th>
                     </tr>
@@ -72,6 +73,16 @@
                                 {% endif %}
                             </td>
                             <td>
+                                {% set active_assign = member.trainer_assignments | selectattr('is_active', 'equalto', True) | first if member.trainer_assignments else None %}
+                                {% if active_assign and active_assign.trainer %}
+                                    <span class="badge bg-dark border border-rage text-light">
+                                        <i class="fas fa-user-ninja text-rage me-1"></i> {{ active_assign.trainer.full_name }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-black border border-secondary text-muted">Unassigned</span>
+                                {% endif %}
+                            </td>
+                            <td>
                                 {% if member.is_active %}
                                     <span class="badge bg-success">Active</span>
                                 {% else %}
@@ -79,7 +90,10 @@
                                 {% endif %}
                             </td>
                             <td class="pe-4 text-end">
-                                <form action="{{ url_for('admin.toggle_user_status', user_id=member.user.id) }}" method="POST" class="d-inline">
+                                <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#assignCoachModal{{ member.id }}" title="Assign Coach">
+                                    <i class="fas fa-user-ninja"></i>
+                                </button>
+                                <form action="{{ url_for('admin.toggle_user_status', user_id=member.user.id) }}" method="POST" class="d-inline ms-1">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                     <button type="submit" class="btn btn-sm {{ 'btn-outline-warning' if member.is_active else 'btn-outline-success' }}" title="Toggle Disable/Enable">
                                         <i class="fas {{ 'fa-ban' if member.is_active else 'fa-check' }}"></i>
@@ -93,10 +107,47 @@
                                 </form>
                             </td>
                         </tr>
+
+                        <!-- Assign Coach Modal for Member -->
+                        <div class="modal fade" id="assignCoachModal{{ member.id }}" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content bg-dark-card border border-dark-rage text-white">
+                                    <div class="modal-header border-bottom border-dark-rage">
+                                        <h5 class="modal-title fw-bold text-uppercase"><i class="fas fa-user-ninja text-rage me-2"></i> Assign Coach to {{ member.full_name }}</h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <form action="{{ url_for('admin.assign_coach') }}" method="POST">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="member_id" value="{{ member.id }}">
+                                        <div class="modal-body text-start">
+                                            <p class="text-muted small">Select an active trainer from the coaching roster to manage workout splits and diet plans for this athlete:</p>
+                                            <div class="mb-3">
+                                                <label class="form-label small text-uppercase fw-bold">Select Coach</label>
+                                                <select name="trainer_id" class="form-select bg-dark text-white border-secondary" required>
+                                                    {% if trainers %}
+                                                        {% for trn in trainers %}
+                                                            <option value="{{ trn.id }}" {{ 'selected' if active_assign and active_assign.trainer_id == trn.id }}>
+                                                                {{ trn.full_name }} ({{ trn.specialization or 'Strength Coach' }})
+                                                            </option>
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        <option value="" disabled>No active trainers available</option>
+                                                    {% endif %}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-top border-dark-rage">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                                            <button type="submit" class="btn btn-rage fw-bold text-uppercase" {{ 'disabled' if not trainers }}>Assign Coach</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                         {% endfor %}
                     {% else %}
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">No athletes registered in the database yet.</td>
+                            <td colspan="8" class="text-center text-muted py-5">No athletes registered in the database yet.</td>
                         </tr>
                     {% endif %}
                 </tbody>

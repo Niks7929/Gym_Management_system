@@ -6,7 +6,8 @@ from app.models.user import User
 class LoginForm(FlaskForm):
     role = SelectField('Login As', choices=[
         ('member', 'Member'),
-        ('trainer', 'Trainer / Coach')
+        ('trainer', 'Trainer / Coach'),
+        ('receptionist', 'Front Desk / Receptionist')
     ], validators=[Optional()], default='member')
     email = StringField('Email Address', validators=[DataRequired(), Email(), Length(max=120)], render_kw={"placeholder": "name@domain.com", "autocomplete": "email"})
     password = PasswordField('Password', validators=[DataRequired(), Length(min=6)], render_kw={"placeholder": "••••••••", "autocomplete": "current-password"})
